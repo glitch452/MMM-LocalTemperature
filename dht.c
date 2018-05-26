@@ -1,8 +1,10 @@
-/*
- *  dht.c:
- *      Author: Juergen Wolf-Hofer
- *      based on / adapted from http://www.uugear.com/portfolio/read-dht1122-temperature-humidity-sensor-from-raspberry-pi/
- *	reads temperature and humidity from DHT11 or DHT22 sensor and outputs according to selected mode
+/**
+ * dht.c:
+ *     Author: David Dearden
+ *
+ *
+ *
+ * reads temperature and humidity from DHT11, DHT22, or AM2302 sensor and outputs according to selected mode
  */
 
 #include <wiringPi.h>
@@ -21,16 +23,13 @@
 #define DHT_MAXCOUNT 32000
 #define DHT_PULSES 41
 #define DHT_ERROR_TIMEOUT 2
-//#define DHT11 11
-//#define DHT22 22
 
 // GLOBAL VARIABLES
 uint8_t dht_pin = 3;  // default GPIO 22 (wiringPi 3)
 char mode = 'c';      // valid modes are c, f, h, j
-
 int data[5] = { 0, 0, 0, 0, 0 };
 int debug = 0;
-//int type = DHT22;
+int max_attempts = 0;
 float temp_c = -1;
 float temp_f = -1;
 float humidity  = -1;
@@ -39,7 +38,6 @@ float humidity  = -1;
 int init();
 void printUsage();
 int read_dht_data();
-
 void busy_wait_milliseconds(uint32_t millis);
 void sleep_milliseconds(uint32_t millis);
 void set_max_priority(void);
@@ -86,15 +84,11 @@ void set_default_priority(void) {
 }
 
 int read_dht_data() {
-	//uint8_t laststate = HIGH;
-	//uint8_t counter	= 0;
-	//uint8_t j = 0;
-	//uint8_t i;
-
 	// Store the count that each DHT bit pulse is low and high.
   // Make sure array is initialized to start at zero.
   int pulseCounts[DHT_PULSES*2] = {0};
 
+  // Ensure the data values are 0
 	data[0] = data[1] = data[2] = data[3] = data[4] = 0;
 
 	// Set pin to output.
@@ -106,7 +100,6 @@ int read_dht_data() {
 	// Set pin high for ~500 milliseconds.
 	digitalWrite(dht_pin, HIGH);
 	sleep_milliseconds(500);
-	//delay(500);
 
 	// The next calls are timing critical and care should be taken
 	// to ensure no unnecssary work is done below.
@@ -114,9 +107,8 @@ int read_dht_data() {
 	// Set pin low for ~20 milliseconds.
 	digitalWrite(dht_pin, LOW);
 	busy_wait_milliseconds(20);
-	//delay(20);
 
-	// Set pin yo input.
+	// Set pin to input.
 	pinMode(dht_pin, INPUT);
 	// Need a very short delay before reading pins or else value is sometimes still low.
 	for (volatile int i = 0; i < 50; ++i) {
@@ -129,6 +121,7 @@ int read_dht_data() {
 			// Timeout waiting for response.
 			set_default_priority();
 			temp_c = temp_f = humidity = -1;
+      if (debug) fprintf(stdout, "Timeout reached while waiting for a response from the sensor.\n");
 			return 1;
 		}
 	}
@@ -141,6 +134,7 @@ int read_dht_data() {
 				// Timeout waiting for response.
 				set_default_priority();
 				temp_c = temp_f = humidity = -1;
+        if (debug) fprintf(stdout, "Timeout reached while waiting for a response from the sensor.\n");
 				return 1;
 			}
 		}
@@ -150,10 +144,12 @@ int read_dht_data() {
 				// Timeout waiting for response.
 				set_default_priority();
 				temp_c = temp_f = humidity = -1;
+        if (debug) fprintf(stdout, "Timeout reached while waiting for a response from the sensor.\n");
 				return 1;
 			}
 		}
 	}
+
 	// Done with timing critical code, now interpret the results.
 
 	// Drop back to normal priority.
@@ -189,11 +185,11 @@ int read_dht_data() {
 
 		float h = (float)((data[0] << 8) + data[1]) / 10;
 		if ( h > 100 ) {
-			h = data[0];	// for DHT11
+			h = data[0]; // for DHT11
 		}
 		float c = (float)(((data[2] & 0x7F) << 8) + data[3]) / 10;
 		if ( c > 125 ) {
-			c = data[2];	// for DHT11
+			c = data[2]; // for DHT11
 		}
 		if ( data[2] & 0x80 ) {
 			c = -c;
@@ -202,41 +198,29 @@ int read_dht_data() {
 		temp_f = c * 1.8f + 32;
 		humidity = h;
 
-		/* alternative method to calculate the temperatures
-		if (type == DHT11) {
-			// Get humidity and temp for DHT11 sensor.
-			humidity = (float)data[0];
-			temp_c = (float)data[2];
-			temp_f = temp_c * 1.8f + 32;
-		}
-		else if (type == DHT22) {
-			// Calculate humidity and temp for DHT22 sensor.
-			humidity = (data[0] * 256 + data[1]) / 10.0f;
-			temp_c = ((data[2] & 0x7F) * 256 + data[3]) / 10.0f;
-			if (data[2] & 0x80) {
-				temp_c *= -1.0f;
-			}
-			temp_f = temp_c * 1.8f + 32;
-		}
-		*/
-
 		if (debug) printf( "read_dht_data() Humidity = %.1f %% Temperature = %.1f *C (%.1f *F)\n", humidity, temp_c, temp_f );
 		return 0; // OK
+
 	} else {
-		if (debug) printf( "read_dht_data() Data not good, skip\n" );
+
+		if (debug) printf( "read_dht_data() Error: data failed checksum test, skip...\n" );
 		temp_c = temp_f = humidity = -1;
 		return 1; // Error
+
 	}
 
 }
 
 void printUsage() {
-	fprintf(stdout, "Usage: dht c|f|h|j pin\n"
-                  "    c . . . temperature in celsius\n"
-                  "    f . . . temperature in fahrenheit\n"
-                  "    h . . . humidity\n"
-                  "    j . . . JSON string with all three\n"
-                  "    pin . . GPIO pin (wiringPi numbering)\n");
+	fprintf(stdout, "Usage: dht pin [-m | -mode <c|f|h|j>] [-a | -attempts <value>] [-d | -debug]\n"
+                  "    pin . . GPIO pin (wiringPi numbering)\n"
+                  "    -m . . .The output mode\n"
+                  "        c . output the temperature in celsius (Default Output Mode)\n"
+                  "        f . output the temperature in fahrenheit\n"
+                  "        h . output the humidity\n"
+                  "        j . output a JSON string with all three\n"
+                  "    -d . . .Enable debug mode\n"
+                  "    -a . . .The max number of attempts to query the sensor (default: 0 - unlimited)\n");
 }
 
 int init() {
@@ -250,29 +234,52 @@ int init() {
 
 int main(int argc, char *argv[]) {
 	int done = 0;
+  int attempts = 0;
 
-	if (argc != 3 && argc != 4) {
+	if (argc < 2) {
+    fprintf(stderr, "Invalid parameters provided\n");
 		printUsage();
 		exit(1);
 		return 1;
-	} else {
-		mode = argv[1][0]; // First argument, first character in the 'string'
-		dht_pin = atoi(argv[2]); // Second argument, pin number
-		if (mode != 'c' && mode != 'f' && mode != 'h' && mode != 'j') {
-			printUsage();
-			exit(1);
-			return 1;
-		}
 	}
-	if (argc == 4 && argv[3][0] == 'd') { debug = 1; }
-	if (debug) fprintf(stdout, "Reading DHT22... mode: %c PIN: %i\n", mode, dht_pin);
+
+  dht_pin = atoi(argv[1]); // First argument, pin number
+
+  for (int i = 2; i < argc; i++) {
+    if (argv[i][0] == '-') {
+      if (argv[i][1] == 'd') {
+        debug = 1;
+      } else if ((i + 1) < argc && argv[i + 1][0] != '-') {
+        switch (argv[i++][1]) {
+          case 'm':
+            if (argv[i][0] == 'c' || argv[i][0] == 'f' || argv[i][0] == 'h' || argv[i][0] == 'j') { mode = argv[i][0]; }
+            break;
+          case 'a': max_attempts = atoi(argv[i]); break;
+        }
+      }
+    }
+  }
+
+	if (debug) fprintf(stdout, "Reading sensor... mode: %c PIN: %i max_attempts: %i\n", mode, dht_pin, max_attempts);
 
 	init();
 
-	while (!done) {
+	while (!done && (max_attempts == 0 || attempts < max_attempts)) {
+    if (attempts > 0) { delay(WAIT_TIME); }
+    attempts++;
+    if (debug) fprintf(stdout, "Attempt #%i...\n", attempts);
 		done = !read_dht_data();
-		delay(WAIT_TIME);
 	}
+
+  if (!done) {
+    fprintf(stderr, "Unable to read sensor data after %i attempt(s).\n", attempts);
+    exit(1);
+    return 1;
+  }
+
+	if (debug) printf( "main() Humidity = %.1f %% Temperature = %.1f *C (%.1f *F)\n", humidity, temp_c, temp_f );
+
+  if (debug) fprintf(stdout, "Output: ");
 
 	switch(mode) {
 		case 'c':
@@ -291,7 +298,6 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "invalid mode '%c', should not happen\n", mode);
 	}
 
-	if (debug) printf( "main() Humidity = %.1f %% Temperature = %.1f *C (%.1f *F)\n", humidity, temp_c, temp_f );
-
 	return(0);
+
 }

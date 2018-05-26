@@ -25,11 +25,10 @@ Module.register("MMM-LocalTemperature", {
 		sendHumidity: true,
 		showTemperature: false,
 		showHumidity: false,
-		
-		initialLoadDelay: 0, // 0 seconds delay
-		animationSpeed: 0,
-		retryDelay: 5, // Seconds, minimum 5
-		updateInterval: 5, // Minutes
+		initialLoadDelay: 0, // Seconds, minimum 0
+		animationSpeed: 0, // Milliseconds, minimum 0
+		retryDelay: 10, // Seconds, minimum 10
+		updateInterval: 5, // Minutes, minimum 0.5
 		developerMode: false,
 	},
 	
@@ -86,7 +85,7 @@ Module.register("MMM-LocalTemperature", {
 		// Process and validate configuration options
 		if (axis.isNumber(self.config.updateInterval) && self.config.updateInterval >= 0.5) { self.config.updateInterval = self.config.updateInterval * 60 * 1000; }
 		else { self.config.updateInterval = self.defaults.updateInterval * 60 * 1000; }
-		if (axis.isNumber(self.config.retryDelay) && self.config.retryDelay >= 5) { self.config.retryDelay = self.config.retryDelay * 1000; }
+		if (axis.isNumber(self.config.retryDelay) && self.config.retryDelay >= 10) { self.config.retryDelay = self.config.retryDelay * 1000; }
 		else { self.config.retryDelay = self.defaults.retryDelay * 1000; }
 		if (axis.isNumber(self.config.initialLoadDelay) && self.config.initialLoadDelay >= 0) { self.config.initialLoadDelay = self.config.initialLoadDelay * 1000; }
 		else { self.config.initialLoadDelay = self.defaults.initialLoadDelay * 1000; }
@@ -111,17 +110,7 @@ Module.register("MMM-LocalTemperature", {
 		self.log(("start(): self.data: " + JSON.stringify(self.data)), "dev");
 		self.log(("start(): self.config: " + JSON.stringify(self.config)), "dev");
 		
-		// Request the data from the sensor
-		if (!axis.isNull(self.config.sensorPin)) {
-			if (self.config.initialLoadDelay > 0) {
-				self.log(self.translate("INITIAL_DELAY", { "seconds": (self.config.initialLoadDelay / 1000) }));
-				setTimeout(function(){ self.getData(1); self.scheduleUpdate(); }, self.config.initialLoadDelay );
-			} else {
-				self.getData(1);
-				self.scheduleUpdate();
-			}
-		}
-		
+		// The module will start requesting sensor data when the system notification "ALL_MODULES_STARTED" is received
 	},
 	
 	/**
@@ -208,13 +197,14 @@ Module.register("MMM-LocalTemperature", {
 				self.sensorData = payload.data;
 				self.sendDataNotifications();
 				self.loaded = true;
-				self.updateDom(self.config.animationSpeed);
+				if (self.data.position) { self.updateDom(self.config.animationSpeed); }
 			} else if (payload.original.attemptNum < self.maxDataAttempts) {
-				self.log(self.translate("DATA_FAILURE", { "retryTimeInSeconds": 8 }));
+				payload.error.stderr = payload.data;
+				self.log(self.translate("DATA_FAILURE", { "retryTimeInSeconds": (self.config.retryDelay / 1000) }) + "\n" + JSON.stringify(payload.error));
 				setTimeout(function() { self.getData(Number(payload.original.attemptNum) + 1); }, self.config.retryDelay);
 			} else {
 				self.loaded = true;
-				self.updateDom(self.config.animationSpeed);
+				if (self.data.position) { self.updateDom(self.config.animationSpeed); }
 			}
 		}
 	},
@@ -227,11 +217,11 @@ Module.register("MMM-LocalTemperature", {
 		var self = this;
 		
 		if (self.config.sendTemperature && axis.isNumber(self.sensorData[self.config.tempUnit])) {
-			self.sendNotification("INDOOR_TEMPERATURE", self.sensorData[self.config.tempUnit] );
+			self.sendNotification("INDOOR_TEMPERATURE", self.sensorData[self.config.tempUnit]);
 		}
 		
 		if (self.config.sendHumidity && axis.isNumber(self.sensorData.humidity)) {
-			self.sendNotification("INDOOR_HUMIDITY", self.sensorData.humidity );
+			self.sendNotification("INDOOR_HUMIDITY", self.sensorData.humidity);
 		}
 		
 	},
@@ -245,8 +235,21 @@ Module.register("MMM-LocalTemperature", {
 	 * @param sender (object) The module that the notification originated from
 	 */
 	notificationReceived: function(notification, payload, sender) {
+		var self = this;
+		
 		if (sender) { // If the notification is coming from another module
 			
+		} else if (notification === "ALL_MODULES_STARTED") {
+			// Start this module - Request the data from the sensor
+			if (!axis.isNull(self.config.sensorPin)) {
+				if (self.config.initialLoadDelay > 0) {
+					self.log(self.translate("INITIAL_DELAY", { "seconds": (self.config.initialLoadDelay / 1000) }));
+					setTimeout(function(){ self.getData(1); self.scheduleUpdate(); }, self.config.initialLoadDelay );
+				} else {
+					self.getData(1);
+					self.scheduleUpdate();
+				}
+			}
 		}
 	},
 	

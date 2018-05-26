@@ -48,7 +48,6 @@ module.exports = NodeHelper.create({
 			self.sendSocketNotification("LOG", { original: payload, message: ("node_helper.js loaded successfully."), messageType: "dev" } );
 		}
 	},
-	//scriptPath
 	
 	/**
 	 * The getSensorData queries the sensor for data usin the provided script
@@ -57,12 +56,12 @@ module.exports = NodeHelper.create({
 	 */
 	getSensorData: function(payload) {
 		var self = this;
-		exec("sudo " + payload.scriptPath + " j " + payload.sensorPin, {}, function(error, stdout, stderr){
+		exec("sudo " + payload.scriptPath + " " + payload.sensorPin + " -m j -a 3", {}, function(error, stdout, stderr){
 			var result;
 			if (!error) {
 				result = { original: payload, isSuccessful: true, data: JSON.parse(stdout) };
 			} else {
-				result = { original: payload, isSuccessful: false, data: error };
+				result = { original: payload, isSuccessful: false, data: stderr, error: error };
 			}
 			if (typeof payload.notification === "string") { self.sendSocketNotification(payload.notification, result); }
 		});
