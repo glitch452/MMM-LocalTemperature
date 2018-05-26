@@ -272,15 +272,17 @@ Module.register("MMM-LocalTemperature", {
 			
 			if (self.config.showTemperature) {
 				var temperature = document.createElement("div");
-				temperature.innerHTML = "Temperature: " + self.sensorData[self.config.tempUnit] + "&deg;";
-				if (self.config.tempUnit === "celcius") { temperature.innerHTML += "C"; }
-				else { temperature.innerHTML += "F"; }
+				if (self.config.tempUnit === "celcius") {
+					temperature.innerHTML = self.translate("SHOW_TEMP_CELCIUS", { "temperature": self.sensorData[self.config.tempUnit] });
+				} else {
+					temperature.innerHTML = self.translate("SHOW_TEMP_FAHRENHEIT", { "temperature": self.sensorData[self.config.tempUnit] });
+				}
 				wrapper.appendChild(temperature);
 			}
 			
 			if (self.config.showHumidity) {
 				var humidity = document.createElement("div");
-				humidity.innerHTML = "Humidity: " + self.sensorData.humidity + "%";
+				humidity.innerHTML = self.translate("SHOW_HUMIDITY", { "humidity": self.sensorData.humidity });
 				wrapper.appendChild(humidity);
 			}
 			

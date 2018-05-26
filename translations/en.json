@@ -7,5 +7,8 @@
 	"DATA_SUCCESS": "Sensor read Successful, data received from the sensor after {numberOfAttempts} attempt(s). ",
 	"DATA_FAILURE": "Sensor read Error, trying again in {retryTimeInSeconds} seconds. ",
 	"UPDATE_SCHEDULED": "Update scheduled to run automatically every {minutes} minute(s).",
-	"INITIAL_DELAY": "Initial delay set. Starting in {seconds} second(s)."
+	"INITIAL_DELAY": "Initial delay set. Starting in {seconds} second(s).",
+	"SHOW_TEMP_CELCIUS": "Temperature: {temperature}&deg;C",
+	"SHOW_TEMP_FAHRENHEIT": "Temperature: {temperature}&deg;F",
+	"SHOW_HUMIDITY": "Humidity: {humidity}%"
 }
