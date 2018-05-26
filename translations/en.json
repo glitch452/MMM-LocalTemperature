@@ -1,0 +1,11 @@
+{
+	"INVALID_PIN": "The provided pin number ({pinValue}) is invalid.",
+	"SUSPENDED": "Suspended",
+	"RESUMED": "Resumed",
+	"LOADING": "Loading &hellip;",
+	"DATA_REQUESTED": "Request sent to get the sensor data. ",
+	"DATA_SUCCESS": "Sensor read Successful, data received from the sensor after {numberOfAttempts} attempt(s). ",
+	"DATA_FAILURE": "Sensor read Error, trying again in {retryTimeInSeconds} seconds. ",
+	"UPDATE_SCHEDULED": "Update scheduled to run automatically every {minutes} minute(s).",
+	"INITIAL_DELAY": "Initial delay set. Starting in {seconds} second(s)."
+}
