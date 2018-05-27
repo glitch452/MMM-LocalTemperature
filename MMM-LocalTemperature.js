@@ -17,14 +17,14 @@ Module.register("MMM-LocalTemperature", {
 	 * The default configuration options
 	 */
 	defaults: {
-		scriptPath: null, // Set in self.start() becuase access to self.data.path is needed
-		tempUnit: "celcius",
 		sensorPin: null,
 		pinScheme: "BCM",
+		tempUnit: "celcius",
 		sendTemperature: true,
 		sendHumidity: true,
 		showTemperature: false,
 		showHumidity: false,
+		scriptPath: null, // Set in self.start() becuase access to self.data.path is needed
 		initialLoadDelay: 0, // Seconds, minimum 0
 		animationSpeed: 0, // Milliseconds, minimum 0
 		retryDelay: 10, // Seconds, minimum 10

@@ -1,10 +1,8 @@
 /**
- * dht.c:
- *     Author: David Dearden
- *
- *
- *
- * reads temperature and humidity from DHT11, DHT22, or AM2302 sensor and outputs according to selected mode
+ * dht.c: reads temperature and humidity from DHT11, DHT22, or AM2302 sensor and outputs according to selected mode
+ * Author: David Dearden @ https://github.com/glitch452
+ * Partly based on dht22 by nebulx29 @ https://github.com/nebulx29/dht22
+ * Partly based on Python DHT Sensor Library by Adafruit @ https://github.com/adafruit/Adafruit_Python_DHT
  */
 
 #include <wiringPi.h>
