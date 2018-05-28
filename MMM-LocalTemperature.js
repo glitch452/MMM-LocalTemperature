@@ -289,6 +289,7 @@ Module.register("MMM-LocalTemperature", {
 	 */
 	getDom: function() {
 		var self = this;
+		var dataContainer;
 		var wrapper = document.createElement("div");
 		wrapper.classList.add("small");
 		
@@ -310,17 +311,21 @@ Module.register("MMM-LocalTemperature", {
 			humidityValue = self.replaceAll(humidityValue.toString(), '.', self.config.decimalSymbol);
 			
 			if (self.config.showTemperature) {
-				var temperature = document.createElement("div");
-				temperature.innerHTML = self.replaceAll(self.config.temperatureText, '{temperature}', temperatureValue);
-				temperature.innerHTML = self.replaceAll(temperature.innerHTML, '{humidity}', humidityValue);
-				wrapper.appendChild(temperature);
+				dataContainer = document.createElement("div");
+				dataContainer.classList.add("temperature-container");
+				dataContainer.innerHTML = self.config.temperatureText;
+				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, '{temperature}', temperatureValue);
+				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, '{humidity}', humidityValue);
+				wrapper.appendChild(dataContainer);
 			}
 			
 			if (self.config.showHumidity) {
-				var humidity = document.createElement("div");
-				humidity.innerHTML = self.replaceAll(self.config.humidityText, '{humidity}', self.sensorData.humidity);
-				humidity.innerHTML = self.replaceAll(humidity.innerHTML, '{temperature}', humidityValue);
-				wrapper.appendChild(humidity);
+				dataContainer = document.createElement("div");
+				dataContainer.classList.add("humidity-container");
+				dataContainer.innerHTML = self.config.humidityText;
+				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, '{temperature}', temperatureValue);
+				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, '{humidity}', humidityValue);
+				wrapper.appendChild(dataContainer);
 			}
 			
 		} else {
