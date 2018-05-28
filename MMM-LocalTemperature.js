@@ -7,7 +7,7 @@
  * By David Dearden
  * MIT Licensed.
  */
-var axis, Log;
+
 /**
  * Register the module with the MagicMirror program
  */
@@ -305,18 +305,18 @@ Module.register("MMM-LocalTemperature", {
 			
 			var temperatureDecimals = self.config.roundTemperature ? 0 : 1;
 			var temperatureValue = self.roundNumber(self.sensorData[self.tempUnit], temperatureDecimals).toFixed(temperatureDecimals);
-			temperatureValue = self.replaceAll(temperatureValue.toString(), '.', self.config.decimalSymbol);
+			temperatureValue = self.replaceAll(temperatureValue.toString(), ".", self.config.decimalSymbol);
 			
 			var humidityDecimals = self.config.roundHumidity ? 0 : 1;
 			var humidityValue = self.roundNumber(self.sensorData.humidity, humidityDecimals).toFixed(humidityDecimals);
-			humidityValue = self.replaceAll(humidityValue.toString(), '.', self.config.decimalSymbol);
+			humidityValue = self.replaceAll(humidityValue.toString(), ".", self.config.decimalSymbol);
 			
 			if (self.config.showTemperature) {
 				dataContainer = document.createElement("div");
 				dataContainer.classList.add("temperature-container");
 				dataContainer.innerHTML = self.config.temperatureText;
-				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, '{temperature}', temperatureValue);
-				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, '{humidity}', humidityValue);
+				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{temperature}", temperatureValue);
+				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{humidity}", humidityValue);
 				wrapper.appendChild(dataContainer);
 			}
 			
@@ -324,8 +324,8 @@ Module.register("MMM-LocalTemperature", {
 				dataContainer = document.createElement("div");
 				dataContainer.classList.add("humidity-container");
 				dataContainer.innerHTML = self.config.humidityText;
-				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, '{temperature}', temperatureValue);
-				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, '{humidity}', humidityValue);
+				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{temperature}", temperatureValue);
+				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{humidity}", humidityValue);
 				wrapper.appendChild(dataContainer);
 			}
 			
@@ -346,8 +346,8 @@ Module.register("MMM-LocalTemperature", {
 	 * @return (number) The rounded number
 	 */
 	roundNumber: function(number, precision) {
-        if (precision >= 0) { return Number(Math.round(number + 'e' + precision) + 'e-' + precision); }
-    	else { return Number(Math.round(number + 'e-' + Math.abs(precision)) + 'e' + Math.abs(precision)); }
+        if (precision >= 0) { return Number(Math.round(number + "e" + precision) + "e-" + precision); }
+    	else { return Number(Math.round(number + "e-" + Math.abs(precision)) + "e" + Math.abs(precision)); }
     },
 	
 	/**
@@ -359,7 +359,7 @@ Module.register("MMM-LocalTemperature", {
 	 * @return (string) A copy of str with all the find occurrences replaced with replace
 	 */
 	replaceAll: function(str, find, replace) {
-		var output = '';
+		var output = "";
 		var idx = str.indexOf(find);
 		while (idx >= 0) {
 			output += str.substr(0, idx) + replace;
