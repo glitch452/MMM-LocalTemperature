@@ -8,7 +8,9 @@
 	"DATA_FAILURE": "Sensor read Error, trying again in {retryTimeInSeconds} seconds. ",
 	"UPDATE_SCHEDULED": "Update scheduled to run automatically every {minutes} minute(s).",
 	"INITIAL_DELAY": "Initial delay set. Starting in {seconds} second(s).",
-	"SHOW_TEMP_CELCIUS": "Temperature: {temperature}&deg;C",
-	"SHOW_TEMP_FAHRENHEIT": "Temperature: {temperature}&deg;F",
-	"SHOW_HUMIDITY": "Humidity: {humidity}%"
+	"DECIMAL_SYMBOL": ".",
+	"SHOW_TEMP_CELCIUS": "Temperature: {temperature_var}&deg;C",
+	"SHOW_TEMP_KELVIN": "Temperature: {temperature_var} K",
+	"SHOW_TEMP_FAHRENHEIT": "Temperature: {temperature_var}&deg;F",
+	"SHOW_HUMIDITY": "Humidity: {humidity_var}%"
 }

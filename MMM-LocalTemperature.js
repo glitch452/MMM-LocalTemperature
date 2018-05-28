@@ -19,11 +19,16 @@ Module.register("MMM-LocalTemperature", {
 	defaults: {
 		sensorPin: null,
 		pinScheme: "BCM",
-		tempUnit: "celcius",
+		units: config.units,
 		sendTemperature: true,
 		sendHumidity: true,
 		showTemperature: false,
 		showHumidity: false,
+		temperatureText: null, // Set in self.start() becuase access to self.translate is needed
+		humidityText: null, // Set in self.start() becuase access to self.translate is needed
+		decimalSymbol: null, // Set in self.start() becuase access to self.translate is needed
+		roundTemperature: false,
+		roundHumidity: false,
 		scriptPath: null, // Set in self.start() becuase access to self.data.path is needed
 		initialLoadDelay: 0, // Seconds, minimum 0
 		animationSpeed: 0, // Milliseconds, minimum 0
@@ -48,10 +53,13 @@ Module.register("MMM-LocalTemperature", {
 		self.updateTimer = null;
 		self.sensorData = null;
 		self.loaded = false;
-		self.defaults.scriptPath = self.data.path + "dht";
+		self.defaults.scriptPath = self.data.path + "DHT";
+		self.defaults.decimalSymbol = self.translate("DECIMAL_SYMBOL");
 		self.maxDataAttempts = 3;
-		self.validTempUnits = [ "celcius", "fahrenheit" ];
+		self.validUnits = [ "metric", "imperial", "default" ];
+		var unitMap = { "metric": "celcius", "imperial": "fahrenheit", "default": "kelvin" };
 		self.validPinSchemes = [ "BOARD", "BCM", "WPI" ];
+		self.currentweatherLoaded = false;
 		
 		var pinMapping = [
 			{ "BOARD": 3, "BCM": 2, "WPI": 8 },
@@ -91,11 +99,25 @@ Module.register("MMM-LocalTemperature", {
 		else { self.config.initialLoadDelay = self.defaults.initialLoadDelay * 1000; }
 		if (!axis.isNumber(self.config.retryDelay) || self.config.retryDelay < 0) { self.config.animationSpeed = self.defaults.animationSpeed; }
 		if (!axis.isString(self.config.scriptPath) || self.config.scriptPath.length < 1 ) { self.config.scriptPath = self.defaults.scriptPath; }
-		if (!self.validTempUnits.includes(self.config.tempUnit)) { self.config.tempUnit = self.defaults.tempUnit; }
+		if (!self.validUnits.includes(self.config.units)) { self.config.units = self.defaults.units; }
+		self.tempUnit = unitMap[self.config.units];
+		if (self.tempUnit === "celcius") {
+			self.defaults.temperatureText = self.translate("SHOW_TEMP_CELCIUS", { "temperature_var": "{temperature}" });
+		} else if (self.tempUnit === "fahrenheit") {
+			self.defaults.temperatureText = self.translate("SHOW_TEMP_FAHRENHEIT", { "temperature_var": "{temperature}" });
+		} else {
+			self.defaults.temperatureText = self.translate("SHOW_TEMP_KELVIN", { "temperature_var": "{temperature}" });
+		}
+		self.defaults.humidityText = self.translate("SHOW_HUMIDITY", { "humidity_var": "{humidity}" });
+		if (!axis.isString(self.config.temperatureText) || self.config.temperatureText.length < 1 ) { self.config.temperatureText = self.defaults.temperatureText; }
+		if (!axis.isString(self.config.humidityText) || self.config.humidityText.length < 1 ) { self.config.humidityText = self.defaults.humidityText; }
 		if (!self.validPinSchemes.includes(self.config.pinScheme)) { self.config.pinScheme = self.defaults.pinScheme; }
 		if (!axis.isNumber(self.config.sensorPin)) { self.config.sensorPin = self.defaults.sensorPin; }
 		if (!axis.isBoolean(self.config.sendTemperature)) { self.config.sendTemperature = self.defaults.sendTemperature; }
 		if (!axis.isBoolean(self.config.sendHumidity)) { self.config.sendHumidity = self.defaults.sendHumidity; }
+		if (!axis.isBoolean(self.config.roundTemperature)) { self.config.roundTemperature = self.defaults.roundTemperature; }
+		if (!axis.isBoolean(self.config.roundHumidity)) { self.config.roundHumidity = self.defaults.roundHumidity; }
+		if (!axis.isString(self.config.decimalSymbol)) { self.config.decimalSymbol = self.defaults.decimalSymbol; }
 		
 		// Validate the provided sensorPin
 		var pinObj = pinMapping.find(function(val) { return val[this.scheme] === this.pin; }, { scheme: self.config.pinScheme, pin: self.config.sensorPin });
@@ -110,7 +132,17 @@ Module.register("MMM-LocalTemperature", {
 		self.log(("start(): self.data: " + JSON.stringify(self.data)), "dev");
 		self.log(("start(): self.config: " + JSON.stringify(self.config)), "dev");
 		
-		// The module will start requesting sensor data when the system notification "ALL_MODULES_STARTED" is received
+		// Start this module - Request the data from the sensor
+		if (!axis.isNull(self.config.sensorPin)) {
+			if (self.config.initialLoadDelay > 0) {
+				self.log(self.translate("INITIAL_DELAY", { "seconds": (self.config.initialLoadDelay / 1000) }));
+				setTimeout(function(){ self.getData(1); self.scheduleUpdate(); }, self.config.initialLoadDelay );
+			} else {
+				self.getData(1);
+				self.scheduleUpdate();
+			}
+		}
+		
 	},
 	
 	/**
@@ -194,6 +226,7 @@ Module.register("MMM-LocalTemperature", {
 		} else if (notification === "DATA_RECEIVED") {
 			if (payload.isSuccessful) {
 				self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": payload.original.attemptNum }));
+			self.log(("Sensor Data: " + JSON.stringify(payload.data)), "dev");
 				self.sensorData = payload.data;
 				self.sendDataNotifications();
 				self.loaded = true;
@@ -216,8 +249,10 @@ Module.register("MMM-LocalTemperature", {
 	sendDataNotifications: function() {
 		var self = this;
 		
-		if (self.config.sendTemperature && axis.isNumber(self.sensorData[self.config.tempUnit])) {
-			self.sendNotification("INDOOR_TEMPERATURE", self.sensorData[self.config.tempUnit]);
+		if (axis.isNull(self.sensorData)) { return; }
+		
+		if (self.config.sendTemperature && axis.isNumber(self.sensorData[self.tempUnit])) {
+			self.sendNotification("INDOOR_TEMPERATURE", self.sensorData[self.tempUnit]);
 		}
 		
 		if (self.config.sendHumidity && axis.isNumber(self.sensorData.humidity)) {
@@ -238,18 +273,14 @@ Module.register("MMM-LocalTemperature", {
 		var self = this;
 		
 		if (sender) { // If the notification is coming from another module
-			
-		} else if (notification === "ALL_MODULES_STARTED") {
-			// Start this module - Request the data from the sensor
-			if (!axis.isNull(self.config.sensorPin)) {
-				if (self.config.initialLoadDelay > 0) {
-					self.log(self.translate("INITIAL_DELAY", { "seconds": (self.config.initialLoadDelay / 1000) }));
-					setTimeout(function(){ self.getData(1); self.scheduleUpdate(); }, self.config.initialLoadDelay );
-				} else {
-					self.getData(1);
-					self.scheduleUpdate();
+			if (notification === "CURRENTWEATHER_DATA") {
+				if (!self.currentweatherLoaded) {
+					self.currentweatherLoaded = true;
+					self.sendDataNotifications();
 				}
 			}
+		} else if (notification === "ALL_MODULES_STARTED") {
+			
 		}
 	},
 	
@@ -264,25 +295,31 @@ Module.register("MMM-LocalTemperature", {
 		if (self.config.showTemperature || self.config.showHumidity) {
 			
 			if (!self.loaded) {
-				wrapper.classList.add('loading');
-				wrapper.classList.add('small');
-				wrapper.innerHTML += self.translate('LOADING');
+				wrapper.classList.add("loading");
+				wrapper.classList.add("small");
+				wrapper.innerHTML += self.translate("LOADING");
 				return wrapper;
 			}
 			
+			var temperatureDecimals = self.config.roundTemperature ? 0 : 1;
+			var temperatureValue = self.roundNumber(self.sensorData[self.tempUnit], temperatureDecimals).toFixed(temperatureDecimals);
+			temperatureValue = self.replaceAll(temperatureValue.toString(), '.', self.config.decimalSymbol);
+			
+			var humidityDecimals = self.config.roundHumidity ? 0 : 1;
+			var humidityValue = self.roundNumber(self.sensorData.humidity, humidityDecimals).toFixed(humidityDecimals);
+			humidityValue = self.replaceAll(humidityValue.toString(), '.', self.config.decimalSymbol);
+			
 			if (self.config.showTemperature) {
 				var temperature = document.createElement("div");
-				if (self.config.tempUnit === "celcius") {
-					temperature.innerHTML = self.translate("SHOW_TEMP_CELCIUS", { "temperature": self.sensorData[self.config.tempUnit] });
-				} else {
-					temperature.innerHTML = self.translate("SHOW_TEMP_FAHRENHEIT", { "temperature": self.sensorData[self.config.tempUnit] });
-				}
+				temperature.innerHTML = self.replaceAll(self.config.temperatureText, '{temperature}', temperatureValue);
+				temperature.innerHTML = self.replaceAll(temperature.innerHTML, '{humidity}', humidityValue);
 				wrapper.appendChild(temperature);
 			}
 			
 			if (self.config.showHumidity) {
 				var humidity = document.createElement("div");
-				humidity.innerHTML = self.translate("SHOW_HUMIDITY", { "humidity": self.sensorData.humidity });
+				humidity.innerHTML = self.replaceAll(self.config.humidityText, '{humidity}', self.sensorData.humidity);
+				humidity.innerHTML = self.replaceAll(humidity.innerHTML, '{temperature}', humidityValue);
 				wrapper.appendChild(humidity);
 			}
 			
@@ -291,6 +328,40 @@ Module.register("MMM-LocalTemperature", {
 		}
 		
 		return wrapper;
+	},
+	
+	/**
+	 * The roundNumber function rounds a number to the specified number of decimal places.  
+	 * Use a negative precision value to round to a position left of the decimal.  
+	 * This function overcomes the floating-point rounding issues and rounds away from 0.  
+	 * 
+	 * @param number (number) The number to round
+	 * @param precision (number) The position to round to before or after the decimal
+	 * @return (number) The rounded number
+	 */
+	roundNumber: function(number, precision) {
+        if (precision >= 0) { return Number(Math.round(number + 'e' + precision) + 'e-' + precision); }
+    	else { return Number(Math.round(number + 'e-' + Math.abs(precision)) + 'e' + Math.abs(precision)); }
+    },
+	
+	/**
+	 * The replaceAll function replaces all occurrences of a string within the given string. 
+	 * 
+	 * @param str (string) The string to search within
+	 * @param find (string) The string to find within str
+	 * @param replace (string) The string to use as a replacement for the find string
+	 * @return (string) A copy of str with all the find occurrences replaced with replace
+	 */
+	replaceAll: function(str, find, replace) {
+		var output = '';
+		var idx = str.indexOf(find);
+		while (idx >= 0) {
+			output += str.substr(0, idx) + replace;
+			str = str.substring(idx + find.length);
+			idx = str.indexOf(find);
+		}
+		output += str;
+		return output;
 	},
 	
 	/**
@@ -309,6 +380,7 @@ Module.register("MMM-LocalTemperature", {
 	getStyles: function () {
 		return [
 			"MMM-LocalTemperature.css",
+			"font-awesome.css",
 		];
 	},
 

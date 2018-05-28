@@ -24,7 +24,7 @@
 
 // GLOBAL VARIABLES
 uint8_t dht_pin = 3;  // default GPIO 22 (wiringPi 3)
-char mode = 'c';      // valid modes are c, f, h, j
+char mode = 'c';      // valid modes are c, f, k, h, j
 int data[5] = { 0, 0, 0, 0, 0 };
 int debug = 0;
 int max_attempts = 0;
@@ -213,10 +213,11 @@ void printUsage() {
 	fprintf(stdout, "Usage: dht pin [-m | -mode <c|f|h|j>] [-a | -attempts <value>] [-d | -debug]\n"
                   "    pin . . GPIO pin (wiringPi numbering)\n"
                   "    -m . . .The output mode\n"
-                  "        c . output the temperature in celsius (Default Output Mode)\n"
-                  "        f . output the temperature in fahrenheit\n"
+                  "        c . output the temperature in Celsius (Default Output Mode)\n"
+                  "        f . output the temperature in Fahrenheit\n"
+                  "        k . output the temperature in Kelvin\n"
                   "        h . output the humidity\n"
-                  "        j . output a JSON string with all three\n"
+                  "        j . output a JSON string with all the data\n"
                   "    -d . . .Enable debug mode\n"
                   "    -a . . .The max number of attempts to query the sensor (default: 0 - unlimited)\n");
 }
@@ -250,7 +251,7 @@ int main(int argc, char *argv[]) {
       } else if ((i + 1) < argc && argv[i + 1][0] != '-') {
         switch (argv[i++][1]) {
           case 'm':
-            if (argv[i][0] == 'c' || argv[i][0] == 'f' || argv[i][0] == 'h' || argv[i][0] == 'j') { mode = argv[i][0]; }
+            if (argv[i][0] == 'c' || argv[i][0] == 'f' || argv[i][0] == 'k' || argv[i][0] == 'h' || argv[i][0] == 'j') { mode = argv[i][0]; }
             break;
           case 'a': max_attempts = atoi(argv[i]); break;
         }
@@ -283,6 +284,9 @@ int main(int argc, char *argv[]) {
 		case 'c':
 			fprintf(stdout, "%.1f\n", temp_c);
 			break;
+		case 'k':
+			fprintf(stdout, "%.1f\n", temp_c + 273.15);
+			break;
 		case 'f':
 			fprintf(stdout, "%.1f\n", temp_f);
 			break;
@@ -290,7 +294,7 @@ int main(int argc, char *argv[]) {
 			fprintf(stdout, "%.1f\n", humidity);
 			break;
 		case 'j':
-			fprintf(stdout, "{ \"humidity\": %.1f, \"celcius\": %.1f, \"fahrenheit\": %.1f }\n", humidity, temp_c, temp_f);
+			fprintf(stdout, "{ \"humidity\": %.1f, \"celcius\": %.1f, \"fahrenheit\": %.1f, \"kelvin\": %.1f, \"attempts\": %i }\n", humidity, temp_c, temp_f, temp_c + 273.15, attempts);
 			break;
 		default:
 			fprintf(stderr, "invalid mode '%c', should not happen\n", mode);
