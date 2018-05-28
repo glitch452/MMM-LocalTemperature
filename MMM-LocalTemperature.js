@@ -122,7 +122,7 @@ Module.register("MMM-LocalTemperature", {
 		// Validate the provided sensorPin
 		var pinObj = pinMapping.find(function(val) { return val[this.scheme] === this.pin; }, { scheme: self.config.pinScheme, pin: self.config.sensorPin });
 		if (axis.isUndefined(pinObj)) {
-			self.log(self.translate("INVALID_PIN"), { "pinValue": self.config.sensorPin });
+			self.log(self.translate("INVALID_PIN", { "pinValue": self.config.sensorPin }), "error");
 			self.config.sensorPin = null;
 		} else {
 			// Select the WiringPi pin number
@@ -208,8 +208,8 @@ Module.register("MMM-LocalTemperature", {
 		// If there is no module ID sent with the notification
 		if (!axis.isString(payload.original.instanceID)) {
 			if (notification === "LOG") {
-				if (payload.translate) { self.log(self.translate(payload.message, payload.translateVars)); }
-				else { self.log(payload.message); }
+				if (payload.translate) { self.log(self.translate(payload.message, payload.translateVars), payload.logType); }
+				else { self.log(payload.message, payload.logType); }
 			}
 			return;
 		}
@@ -221,21 +221,22 @@ Module.register("MMM-LocalTemperature", {
 		}
 		
 		if (notification === "LOG") {
-			if (payload.translate) { self.log(self.translate(payload.message, payload.translateVars)); }
-			else { self.log(payload.message); }
+			if (payload.translate) { self.log(self.translate(payload.message, payload.translateVars), payload.logType); }
+			else { self.log(payload.message, payload.logType); }
 		} else if (notification === "DATA_RECEIVED") {
 			if (payload.isSuccessful) {
 				self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": payload.original.attemptNum }));
-			self.log(("Sensor Data: " + JSON.stringify(payload.data)), "dev");
+				self.log(("Sensor Data: " + JSON.stringify(payload.data)), "dev");
 				self.sensorData = payload.data;
 				self.sendDataNotifications();
 				self.loaded = true;
 				if (self.data.position) { self.updateDom(self.config.animationSpeed); }
 			} else if (payload.original.attemptNum < self.maxDataAttempts) {
 				payload.error.stderr = payload.data;
-				self.log(self.translate("DATA_FAILURE", { "retryTimeInSeconds": (self.config.retryDelay / 1000) }) + "\n" + JSON.stringify(payload.error));
+				self.log(self.translate("DATA_FAILURE_RETRY", { "retryTimeInSeconds": (self.config.retryDelay / 1000) }) + "\n" + JSON.stringify(payload.error), "warn");
 				setTimeout(function() { self.getData(Number(payload.original.attemptNum) + 1); }, self.config.retryDelay);
 			} else {
+				self.log(self.translate("DATA_FAILURE") + "\n" + JSON.stringify(payload.error), "error");
 				self.loaded = true;
 				if (self.data.position) { self.updateDom(self.config.animationSpeed); }
 			}
@@ -416,6 +417,7 @@ Module.register("MMM-LocalTemperature", {
 		} else { message = self.name + ": " + message; }
 		switch (type) {
 			case "error": Log.error(message); break;
+			case "warn": Log.warn(message); break;
 			case "info": Log.info(message); break;
 			case "dev": if (self.config.developerMode) { Log.log(message); } break;
 			default: Log.log(message);
