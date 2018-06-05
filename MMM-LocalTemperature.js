@@ -24,6 +24,7 @@ Module.register("MMM-LocalTemperature", {
 		sendHumidity: true,
 		showTemperature: false,
 		showHumidity: false,
+		iconView: true,
 		temperatureText: null, // Set in self.start() becuase access to self.translate is needed
 		humidityText: null, // Set in self.start() becuase access to self.translate is needed
 		fontSize: "medium",
@@ -119,6 +120,7 @@ Module.register("MMM-LocalTemperature", {
 		if (!axis.isBoolean(self.config.sendHumidity)) { self.config.sendHumidity = self.defaults.sendHumidity; }
 		if (!axis.isBoolean(self.config.roundTemperature)) { self.config.roundTemperature = self.defaults.roundTemperature; }
 		if (!axis.isBoolean(self.config.roundHumidity)) { self.config.roundHumidity = self.defaults.roundHumidity; }
+		if (!axis.isBoolean(self.config.iconView)) { self.config.iconView = self.defaults.iconView; }
 		if (!axis.isString(self.config.decimalSymbol)) { self.config.decimalSymbol = self.defaults.decimalSymbol; }
 		if (!self.validFontSizes.includes(self.config.fontSize)) { self.config.fontSize = self.defaults.fontSize; }
 		
@@ -314,22 +316,38 @@ Module.register("MMM-LocalTemperature", {
 			var humidityValue = self.roundNumber(self.sensorData.humidity, humidityDecimals).toFixed(humidityDecimals);
 			humidityValue = self.replaceAll(humidityValue.toString(), ".", self.config.decimalSymbol);
 			
-			if (self.config.showTemperature) {
+			if (self.config.iconView) {
 				dataContainer = document.createElement("div");
-				dataContainer.classList.add("temperature-container");
-				dataContainer.innerHTML = self.config.temperatureText;
-				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{temperature}", temperatureValue);
-				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{humidity}", humidityValue);
+				dataContainer.classList.add("icon-view-container");
+				if (self.config.showTemperature) {
+					var symbol = "&deg;C";
+					if (self.tempUnit === "fahrenheit") { symbol = "&deg;F"; }
+					else if (self.tempUnit === "kelvin") { symbol = " K"; }
+					dataContainer.innerHTML += "<span class=\"fa fa-thermometer-half\"></span> " + temperatureValue + symbol;
+					if (self.config.showHumidity) { dataContainer.innerHTML += " "; }
+				}
+				if (self.config.showHumidity) {
+					dataContainer.innerHTML += "<span class=\"fa fa-tint\"></span> " + humidityValue + "%";
+				}
 				wrapper.appendChild(dataContainer);
-			}
-			
-			if (self.config.showHumidity) {
-				dataContainer = document.createElement("div");
-				dataContainer.classList.add("humidity-container");
-				dataContainer.innerHTML = self.config.humidityText;
-				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{temperature}", temperatureValue);
-				dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{humidity}", humidityValue);
-				wrapper.appendChild(dataContainer);
+			} else {
+				if (self.config.showTemperature) {
+					dataContainer = document.createElement("div");
+					dataContainer.classList.add("temperature-container");
+					dataContainer.innerHTML = self.config.temperatureText;
+					dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{temperature}", temperatureValue);
+					dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{humidity}", humidityValue);
+					wrapper.appendChild(dataContainer);
+				}
+				
+				if (self.config.showHumidity) {
+					dataContainer = document.createElement("div");
+					dataContainer.classList.add("humidity-container");
+					dataContainer.innerHTML = self.config.humidityText;
+					dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{temperature}", temperatureValue);
+					dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{humidity}", humidityValue);
+					wrapper.appendChild(dataContainer);
+				}
 			}
 			
 		} else {

@@ -6,7 +6,7 @@ This module reads and displays temperature and humidity information from a senso
 
 | Status  | Version | Date       | Maintained? | Minimum MagicMirror² Version |
 |:------- |:------- |:---------- |:----------- |:---------------------------- |
-| Working | `1.0.0` | 2018-06-04 | Yes         |`2.2.1`                       |
+| Working | `1.1.0` | 2018-06-05 | Yes         |`2.2.1`                       |
 
 ### Example
 ![Example of MMM-LocalTemperature](images/sample.png?raw=true "Example screenshot")
@@ -62,6 +62,7 @@ var config = {
 | `sendHumidity`          | *Optional* - When `true`, an "INDOOR_HUMIDITY" notification is sent to the other modules when the data is received from the sensor.  This can be used to display the indoor humidity within the built-in 'currentweather' module. The 'currentweather' module's `showIndoorHumidity` option must be set to `true` for it to display the data sent from this module.<br />**Type:** `boolean`<br />**Default:** `true`
 | `showTemperature`       | *Optional* - When `true`, the module will display the temperature on screen.<br />**Type:** `boolean`<br />**Default:** `false`
 | `showHumidity`          | *Optional* - When `true`, the module will display the humidity on screen.<br />**Type:** `boolean`<br />**Default:** `false`
+| `iconView`              | *Optional* - When `true`, a view which uses icons and the data will be shown instead of the standard temperature and humidity text. The data shown depends on the `showTemperature` and `showHumidity` options. <br />**Type:** `boolean`<br />**Default:** `true`
 | `temperatureText`       | *Optional* - The text template to be used when displaying the temperature data. The stings `"{temperature}"` and `"{humidity}"` will be replaced with the temperature and humidity values respectively. <br />**Type:** `string`<br />**Default:** `"Temperature: {temperature}°C/°F/K"`
 | `humidityText`          | *Optional* - The text template to be used when displaying the humidity data. The stings `"{temperature}"` and `"{humidity}"` will be replaced with the temperature and humidity values respectively. <br />**Type:** `string`<br />**Default:** `"Humidity: {humidity}%"`
 | `fontSize`              | *Optional* - The main font size to use for the module text. <br />**Type:** `string`<br />**Default:** `'medium'`<br />**Options:** `'x-small'`, `'small'`, `'medium'`, `'large'`, `'x-large'`
