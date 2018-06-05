@@ -18,7 +18,7 @@ Module.register("MMM-LocalTemperature", {
 	 */
 	defaults: {
 		sensorPin: null,
-		pinScheme: "BCM",
+		pinScheme: "BCMv2",
 		units: config.units,
 		sendTemperature: true,
 		sendHumidity: true,
@@ -26,6 +26,7 @@ Module.register("MMM-LocalTemperature", {
 		showHumidity: false,
 		temperatureText: null, // Set in self.start() becuase access to self.translate is needed
 		humidityText: null, // Set in self.start() becuase access to self.translate is needed
+		fontSize: "medium",
 		decimalSymbol: null, // Set in self.start() becuase access to self.translate is needed
 		roundTemperature: false,
 		roundHumidity: false,
@@ -34,7 +35,7 @@ Module.register("MMM-LocalTemperature", {
 		animationSpeed: 0, // Milliseconds, minimum 0
 		retryDelay: 10, // Seconds, minimum 10
 		updateInterval: 5, // Minutes, minimum 0.5
-		developerMode: false,
+		developerMode: false
 	},
 	
 	/**
@@ -58,36 +59,37 @@ Module.register("MMM-LocalTemperature", {
 		self.maxDataAttempts = 3;
 		self.validUnits = [ "metric", "imperial", "default" ];
 		var unitMap = { "metric": "celcius", "imperial": "fahrenheit", "default": "kelvin" };
-		self.validPinSchemes = [ "BOARD", "BCM", "WPI" ];
+		self.validPinSchemes = [ "BOARD", "BCMv1", "BCMv2", "WPI" ];
+		self.validFontSizes = [ "x-small", "small", "medium", "large", "x-large" ];
 		self.currentweatherLoaded = false;
 		
 		var pinMapping = [
-			{ "BOARD": 3, "BCM": 2, "WPI": 8 },
-			{ "BOARD": 5, "BCM": 3, "WPI": 9 },
-			{ "BOARD": 7, "BCM": 4, "WPI": 7 },
-			{ "BOARD": 8, "BCM": 14, "WPI": 15 },
-			{ "BOARD": 10, "BCM": 15, "WPI": 16 },
-			{ "BOARD": 11, "BCM": 17, "WPI": 0 },
-			{ "BOARD": 12, "BCM": 18, "WPI": 1 },
-			{ "BOARD": 13, "BCM": 27, "WPI": 2 },
-			{ "BOARD": 15, "BCM": 22, "WPI": 3 },
-			{ "BOARD": 16, "BCM": 23, "WPI": 4 },
-			{ "BOARD": 18, "BCM": 24, "WPI": 5 },
-			{ "BOARD": 19, "BCM": 10, "WPI": 12 },
-			{ "BOARD": 21, "BCM": 9, "WPI": 13 },
-			{ "BOARD": 22, "BCM": 25, "WPI": 6 },
-			{ "BOARD": 23, "BCM": 11, "WPI": 14 },
-			{ "BOARD": 24, "BCM": 8, "WPI": 10 },
-			{ "BOARD": 26, "BCM": 7, "WPI": 11 },
-			{ "BOARD": 29, "BCM": 5, "WPI": 21 },
-			{ "BOARD": 31, "BCM": 6, "WPI": 22 },
-			{ "BOARD": 32, "BCM": 12, "WPI": 26 },
-			{ "BOARD": 33, "BCM": 13, "WPI": 23 },
-			{ "BOARD": 35, "BCM": 19, "WPI": 24 },
-			{ "BOARD": 36, "BCM": 16, "WPI": 27 },
-			{ "BOARD": 37, "BCM": 26, "WPI": 25 },
-			{ "BOARD": 38, "BCM": 20, "WPI": 28 },
-			{ "BOARD": 40, "BCM": 21, "WPI": 29 },
+			{ "BOARD": 10, "BCMv1": 15, "BCMv2": 15, "WPI": 16 },
+			{ "BOARD": 11, "BCMv1": 17, "BCMv2": 17, "WPI": 0 },
+			{ "BOARD": 12, "BCMv1": 18, "BCMv2": 18, "WPI": 1 },
+			{ "BOARD": 13, "BCMv1": 21, "BCMv2": 27, "WPI": 2 },
+			{ "BOARD": 15, "BCMv1": 22, "BCMv2": 22, "WPI": 3 },
+			{ "BOARD": 16, "BCMv1": 23, "BCMv2": 23, "WPI": 4 },
+			{ "BOARD": 18, "BCMv1": 24, "BCMv2": 24, "WPI": 5 },
+			{ "BOARD": 19, "BCMv1": 10, "BCMv2": 10, "WPI": 12 },
+			{ "BOARD": 21, "BCMv1": 9, "BCMv2": 9, "WPI": 13 },
+			{ "BOARD": 22, "BCMv1": 25, "BCMv2": 25, "WPI": 6 },
+			{ "BOARD": 23, "BCMv1": 11, "BCMv2": 11, "WPI": 14 },
+			{ "BOARD": 24, "BCMv1": 8, "BCMv2": 8, "WPI": 10 },
+			{ "BOARD": 26, "BCMv1": 7, "BCMv2": 7, "WPI": 11 },
+			{ "BOARD": 29, "BCMv1": null, "BCMv2": 5, "WPI": 21 },
+			{ "BOARD": 3, "BCMv1": 0, "BCMv2": 2, "WPI": 8 },
+			{ "BOARD": 31, "BCMv1": null, "BCMv2": 6, "WPI": 22 },
+			{ "BOARD": 32, "BCMv1": null, "BCMv2": 12, "WPI": 26 },
+			{ "BOARD": 33, "BCMv1": null, "BCMv2": 13, "WPI": 23 },
+			{ "BOARD": 35, "BCMv1": null, "BCMv2": 19, "WPI": 24 },
+			{ "BOARD": 36, "BCMv1": null, "BCMv2": 16, "WPI": 27 },
+			{ "BOARD": 37, "BCMv1": null, "BCMv2": 26, "WPI": 25 },
+			{ "BOARD": 38, "BCMv1": null, "BCMv2": 20, "WPI": 28 },
+			{ "BOARD": 40, "BCMv1": null, "BCMv2": 21, "WPI": 29 },
+			{ "BOARD": 5, "BCMv1": 1, "BCMv2": 3, "WPI": 9 },
+			{ "BOARD": 7, "BCMv1": 4, "BCMv2": 4, "WPI": 7 },
+			{ "BOARD": 8, "BCMv1": 14, "BCMv2": 14, "WPI": 15 }
 		];
 		
 		// Process and validate configuration options
@@ -118,6 +120,7 @@ Module.register("MMM-LocalTemperature", {
 		if (!axis.isBoolean(self.config.roundTemperature)) { self.config.roundTemperature = self.defaults.roundTemperature; }
 		if (!axis.isBoolean(self.config.roundHumidity)) { self.config.roundHumidity = self.defaults.roundHumidity; }
 		if (!axis.isString(self.config.decimalSymbol)) { self.config.decimalSymbol = self.defaults.decimalSymbol; }
+		if (!self.validFontSizes.includes(self.config.fontSize)) { self.config.fontSize = self.defaults.fontSize; }
 		
 		// Validate the provided sensorPin
 		var pinObj = pinMapping.find(function(val) { return val[this.scheme] === this.pin; }, { scheme: self.config.pinScheme, pin: self.config.sensorPin });
@@ -292,7 +295,6 @@ Module.register("MMM-LocalTemperature", {
 		var self = this;
 		var dataContainer;
 		var wrapper = document.createElement("div");
-		wrapper.classList.add("small");
 		
 		if (self.config.showTemperature || self.config.showHumidity) {
 			
@@ -303,6 +305,7 @@ Module.register("MMM-LocalTemperature", {
 				return wrapper;
 			}
 			
+			wrapper.classList.add(self.config.fontSize);
 			var temperatureDecimals = self.config.roundTemperature ? 0 : 1;
 			var temperatureValue = self.roundNumber(self.sensorData[self.tempUnit], temperatureDecimals).toFixed(temperatureDecimals);
 			temperatureValue = self.replaceAll(temperatureValue.toString(), ".", self.config.decimalSymbol);
@@ -386,7 +389,7 @@ Module.register("MMM-LocalTemperature", {
 	getStyles: function () {
 		return [
 			"MMM-LocalTemperature.css",
-			"font-awesome.css",
+			"font-awesome.css"
 		];
 	},
 
@@ -396,7 +399,7 @@ Module.register("MMM-LocalTemperature", {
 	 */
 	getTranslations: function() {
 		return {
-			en: "translations/en.json",
+			en: "translations/en.json"
 		};
 	},
 	

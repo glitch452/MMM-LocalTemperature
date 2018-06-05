@@ -6,15 +6,15 @@ This module reads and displays temperature and humidity information from a senso
 
 | Status  | Version | Date       | Maintained? | Minimum MagicMirror² Version |
 |:------- |:------- |:---------- |:----------- |:---------------------------- |
-| Beta Testing | `0.2.0` | 2018-05-27 | Yes         |`2.2.1`                       |
+| Working | `1.0.0` | 2018-06-04 | Yes         |`2.2.1`                       |
 
 ### Example
 ![Example of MMM-LocalTemperature](images/sample.png?raw=true "Example screenshot")
 
 ### Notable Features
-1. Get data from a DHT11, DHT22, or AM2302 sensor (The DHT11 sensor is untested as I don't have one to test with)
+1. Get data from a DHT11, DHT22, or AM2302 sensor
 2. Display the temperature and/or humidity from this module and/or,
-3. Send the temperature and/or humidity to the built in 'currentweather' module via notifications
+3. Send the temperature and/or humidity to the built in 'currentweather' module via module notifications
 
 ### Dependencies
 1. A local 'c' program to read the data from the sensor (included)
@@ -55,15 +55,16 @@ var config = {
 
 | Option                  | Details
 |:----------------------- |:-------------
-| `sensorPin`             | **REQUIRED** - The GPIO Pin number that is connected to the data pin on the sensor. The default pin scheme is the standard Raspberry Pi (BCM) GPIO numbering system. See the `pinScheme` option for other numbering systems.<br />**Type:** `number`<br />**Default:** `N/A`<br />
-| `pinScheme`             | *Optional* - The pin numbering system to use for the `sensorPin` option. See this [interactive pinout diagram](https://pinout.xyz) for more details on pin usage for the Raspberry Pi. <br />Note: Ultimately the `sensorPin` value will be converted to the WiringPi system, becuase that is the library used by the `DHT` program to interact with the pin. However, any of these numbering systems can be used, since this module will convert the `sensorPin` value automatically based on the selected scheme. <br />**Type:** `string`<br />**Default:** `"BCM"`<br />**Options:**<br />- `"BCM"` The standard Raspberry Pi GPIO numbering system<br />- `"BOARD"` The physical pin numbering on the GPIO header<br />- `"WPI"` The WiringPi numbering system
+| `sensorPin`             | **REQUIRED** - The GPIO Pin number that is connected to the data pin on the sensor. The default pin scheme is the standard Raspberry Pi (BCM) GPIO numbering system for Rev 2 Pi's. See the `pinScheme` option for other numbering systems.<br />**Type:** `number`<br />
+| `pinScheme`             | *Optional* - The pin numbering system to use for the `sensorPin` option. See this [interactive pinout diagram](https://pinout.xyz) for more details on pin usage for the Raspberry Pi. <br />Note: Ultimately the `sensorPin` value will be converted to the WiringPi system, becuase that is the library used by the `DHT` program to interact with the pin. However, any of these numbering systems can be used, since this module will convert the `sensorPin` value automatically based on the selected scheme. <br />**Type:** `string`<br />**Default:** `"BCMv2"`<br />**Options:**<br />- `"BCMv2"` The standard Raspberry Pi GPIO numbering system on current (Rev 2) boards<br />- `"BCMv1"` The standard Raspberry Pi GPIO numbering system on older (Rev 1) boards<br />- `"BOARD"` The physical pin numbering on the GPIO header<br />- `"WPI"` The WiringPi numbering system
 | `units`              | *Optional* - The unit system to use for the temperature value. (`"metric"` = Celcius, `"imperial"` = Fahrenheit, `"default"` = Kelvin)<br />**Type:** `string`<br />**Default:** `config.units`<br />**Options:** `"metric"`, `"imperial"`, `"default"`
-| `sendTemperature`       | *Optional* - When `true`, an "INDOOR_TEMPERATURE" notification is sent to the other modules when the data is received from the sensor.  This can be used to display the indoor temperature within the built-in 'currentweather' module.<br />**Type:** `boolean`<br />**Default:** `true`
-| `sendHumidity`          | *Optional* - When `true`, an "INDOOR_HUMIDITY" notification is sent to the other modules when the data is received from the sensor.  This can be used to display the indoor humidity within the built-in 'currentweather' module.<br />**Type:** `boolean`<br />**Default:** `true`
+| `sendTemperature`       | *Optional* - When `true`, an "INDOOR_TEMPERATURE" notification is sent to the other modules when the data is received from the sensor.  This can be used to display the indoor temperature within the built-in 'currentweather' module. The 'currentweather' module's `showIndoorTemperature` option must be set to `true` for it to display the data sent from this module.<br />**Type:** `boolean`<br />**Default:** `true`
+| `sendHumidity`          | *Optional* - When `true`, an "INDOOR_HUMIDITY" notification is sent to the other modules when the data is received from the sensor.  This can be used to display the indoor humidity within the built-in 'currentweather' module. The 'currentweather' module's `showIndoorHumidity` option must be set to `true` for it to display the data sent from this module.<br />**Type:** `boolean`<br />**Default:** `true`
 | `showTemperature`       | *Optional* - When `true`, the module will display the temperature on screen.<br />**Type:** `boolean`<br />**Default:** `false`
 | `showHumidity`          | *Optional* - When `true`, the module will display the humidity on screen.<br />**Type:** `boolean`<br />**Default:** `false`
 | `temperatureText`       | *Optional* - The text template to be used when displaying the temperature data. The stings `"{temperature}"` and `"{humidity}"` will be replaced with the temperature and humidity values respectively. <br />**Type:** `string`<br />**Default:** `"Temperature: {temperature}°C/°F/K"`
 | `humidityText`          | *Optional* - The text template to be used when displaying the humidity data. The stings `"{temperature}"` and `"{humidity}"` will be replaced with the temperature and humidity values respectively. <br />**Type:** `string`<br />**Default:** `"Humidity: {humidity}%"`
+| `fontSize`              | *Optional* - The main font size to use for the module text. <br />**Type:** `string`<br />**Default:** `'medium'`<br />**Options:** `'x-small'`, `'small'`, `'medium'`, `'large'`, `'x-large'`
 | `decimalSymbol`         | *Optional* - The character to use as the decimal symbol. <br />**Type:** `string`<br />**Default:** `"."`
 | `roundTemperature`      | *Optional* - When true, the temperature value will be rounded to the nearest integer. <br />**Type:** `boolean`<br />**Default:** `false`
 | `roundHumidity`         | *Optional* - When true, the humidity value will be rounded to the nearest integer. <br />**Type:** `boolean`<br />**Default:** `false`
@@ -75,7 +76,7 @@ var config = {
 
 ## Connecting the Sensor to the Raspberry Pi
 
-Here are some diagrams that you may find useful when connecting your sensor.  See the [adafruit.com guide](docs/adafruit-dht-sensor-guide.pdf?raw=true) for more wiring and programming information.
+Here are some diagrams that you may find useful when connecting your sensor.  See the [guide from adafruit.com](docs/adafruit-dht-sensor-guide.pdf?raw=true) for more wiring and programming information.
 
 ### DHT11 sensor
 ![Example of a DHT11 sensor with a Raspberry Pi](images/wiring_dht11.png?raw=true "How to connect a DHT11 sensor to a Raspberry Pi")
@@ -123,10 +124,4 @@ conditions:
 The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+**The software is provided “as is”, without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.**

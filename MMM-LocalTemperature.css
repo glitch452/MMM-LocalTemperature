@@ -1,8 +1,19 @@
-/**
- * MMM-LocalTemperature
- * 
+ /**
+ * Magic Mirror
+ * Module Style Sheet: MMM-LocalTemperature
+ *
+ * By David Dearden
  * MIT Licensed.
  */
+ 
+/**
+ * Font configurations
+ */
+.MMM-LocalTemperature .x-small	{ font-size: 15px; line-height: 20px; }
+.MMM-LocalTemperature .small	{ font-size: 20px; line-height: 25px; }
+.MMM-LocalTemperature .medium	{ font-size: 30px; line-height: 35px; }
+.MMM-LocalTemperature .large	{ font-size: 65px; line-height: 65px; }
+.MMM-LocalTemperature .x-large	{ font-size: 75px; line-height: 75px; letter-spacing: -3px; }
 
 /**
  * Loading text
