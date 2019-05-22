@@ -6,7 +6,7 @@ This module reads and displays temperature and humidity information from a senso
 
 | Status  | Version | Date       | Maintained? | Minimum MagicMirror² Version |
 |:------- |:------- |:---------- |:----------- |:---------------------------- |
-| Working | `1.1.0` | 2018-06-05 | Yes         |`2.2.1`                       |
+| Working | `1.2.0` | 2019-05-22 | Yes         |`2.2.1`                       |
 
 ### Example
 ![Example of MMM-LocalTemperature](images/sample.png?raw=true "Example screenshot")
@@ -106,6 +106,19 @@ If you have changed the module on your own, the update will fail. <br />To force
 git reset --hard
 git pull
 ```
+
+## Manually Choose a Version
+
+To use an older version of this module, use your terminal to:
+1. Navigate to your MMM-LocalTemperature folder. If you are using the default installation directory, use the command:<br />`cd ~/MagicMirror/modules/MMM-LocalTemperature`
+2. Fetch all the available tags<br />`git fetch`
+3. Show all the available tags<br />`git tag`
+4. Checkout one of the available tags<br />`git checkout {tag_name}`<br />Example: `git checkout v1.0.0`
+
+
+To switch back to the latest version, use your terminal to:
+1. Navigate to your MMM-LocalTemperature folder. If you are using the default installation directory, use the command:<br />`cd ~/MagicMirror/modules/MMM-LocalTemperature`
+2. Checkout the master branch<br />`git checkout master`
 
 ## License
 
