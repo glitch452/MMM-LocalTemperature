@@ -24,8 +24,7 @@ module.exports = NodeHelper.create({
 	
 	/**
 	 * Override the start function to run when the module is started up.  
-	 * Used to provice initialization information to the console and to map
-	 * additional routes.  
+	 * Used to provide initialization information to the console.
 	 */
 	start: function () {
 		var self = this;
@@ -40,7 +39,7 @@ module.exports = NodeHelper.create({
 	 */
 	socketNotificationReceived: function(notification, payload) {
 		var self = this;
-		console.log(self.name + ": Socket Notification Received: \"" + notification + "\".");
+		if (payload.developerMode) { console.log(self.name + ': Socket Notification Received: "' + notification + '".'); }
 		if (notification === "GET_DATA") {
 			self.getSensorData(payload);
 		} else if (notification === "INIT") {

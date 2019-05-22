@@ -1,5 +1,5 @@
 {
-	"INVALID_PIN": "The provided pin number ({pinValue}) is invalid.",
+	"INVALID_PIN": "The provided pin number ({pinValue}) is invalid. ",
 	"SUSPENDED": "Suspended",
 	"RESUMED": "Resumed",
 	"LOADING": "Loading &hellip;",
@@ -7,8 +7,8 @@
 	"DATA_SUCCESS": "Sensor read Successful, data received from the sensor after {numberOfAttempts} attempt(s). ",
 	"DATA_FAILURE_RETRY": "Sensor read Error, trying again in {retryTimeInSeconds} seconds. ",
 	"DATA_FAILURE": "Sensor read Error, unable to read the data from the sensor. ",
-	"UPDATE_SCHEDULED": "Update scheduled to run automatically every {minutes} minute(s).",
-	"INITIAL_DELAY": "Initial delay set. Starting in {seconds} second(s).",
+	"UPDATE_SCHEDULED": "Update scheduled to run automatically every {minutes} minute(s). ",
+	"INITIAL_DELAY": "Initial delay set. Starting in {seconds} second(s). ",
 	"DECIMAL_SYMBOL": ".",
 	"SHOW_TEMP_CELCIUS": "Temperature: {temperature_var}&deg;C",
 	"SHOW_TEMP_KELVIN": "Temperature: {temperature_var} K",
