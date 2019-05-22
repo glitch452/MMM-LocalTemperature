@@ -8,6 +8,8 @@
  * MIT Licensed.
  */
 
+var axis, Log, config;
+
 /**
  * Register the module with the MagicMirror program
  */
@@ -63,6 +65,7 @@ Module.register("MMM-LocalTemperature", {
 		self.validPinSchemes = [ "BOARD", "BCMv1", "BCMv2", "WPI" ];
 		self.validFontSizes = [ "x-small", "small", "medium", "large", "x-large" ];
 		self.currentweatherLoaded = false;
+		self.lastUpdateTime = new Date(0);
 		
 		var pinMapping = [
 			{ "BOARD": 10, "BCMv1": 15, "BCMv2": 15, "WPI": 16 },
@@ -94,13 +97,13 @@ Module.register("MMM-LocalTemperature", {
 		];
 		
 		// Process and validate configuration options
-		if (axis.isNumber(self.config.updateInterval) && self.config.updateInterval >= 0.5) { self.config.updateInterval = self.config.updateInterval * 60 * 1000; }
+		if (axis.isNumber(self.config.updateInterval) && !isNaN(self.config.updateInterval) && self.config.updateInterval >= 0.5) { self.config.updateInterval = self.config.updateInterval * 60 * 1000; }
 		else { self.config.updateInterval = self.defaults.updateInterval * 60 * 1000; }
-		if (axis.isNumber(self.config.retryDelay) && self.config.retryDelay >= 10) { self.config.retryDelay = self.config.retryDelay * 1000; }
+		if (axis.isNumber(self.config.retryDelay) && !isNaN(self.config.retryDelay) && self.config.retryDelay >= 10) { self.config.retryDelay = self.config.retryDelay * 1000; }
 		else { self.config.retryDelay = self.defaults.retryDelay * 1000; }
-		if (axis.isNumber(self.config.initialLoadDelay) && self.config.initialLoadDelay >= 0) { self.config.initialLoadDelay = self.config.initialLoadDelay * 1000; }
+		if (axis.isNumber(self.config.initialLoadDelay) && !isNaN(self.config.initialLoadDelay) && self.config.initialLoadDelay >= 0) { self.config.initialLoadDelay = self.config.initialLoadDelay * 1000; }
 		else { self.config.initialLoadDelay = self.defaults.initialLoadDelay * 1000; }
-		if (!axis.isNumber(self.config.retryDelay) || self.config.retryDelay < 0) { self.config.animationSpeed = self.defaults.animationSpeed; }
+		if (!axis.isNumber(self.config.retryDelay) || isNaN(self.config.retryDelay) || self.config.retryDelay < 0) { self.config.animationSpeed = self.defaults.animationSpeed; }
 		if (!axis.isString(self.config.scriptPath) || self.config.scriptPath.length < 1 ) { self.config.scriptPath = self.defaults.scriptPath; }
 		if (!self.validUnits.includes(self.config.units)) { self.config.units = self.defaults.units; }
 		self.tempUnit = unitMap[self.config.units];
@@ -115,7 +118,7 @@ Module.register("MMM-LocalTemperature", {
 		if (!axis.isString(self.config.temperatureText) || self.config.temperatureText.length < 1 ) { self.config.temperatureText = self.defaults.temperatureText; }
 		if (!axis.isString(self.config.humidityText) || self.config.humidityText.length < 1 ) { self.config.humidityText = self.defaults.humidityText; }
 		if (!self.validPinSchemes.includes(self.config.pinScheme)) { self.config.pinScheme = self.defaults.pinScheme; }
-		if (!axis.isNumber(self.config.sensorPin)) { self.config.sensorPin = self.defaults.sensorPin; }
+		if (!axis.isNumber(self.config.sensorPin) || isNaN(self.config.sensorPin)) { self.config.sensorPin = self.defaults.sensorPin; }
 		if (!axis.isBoolean(self.config.sendTemperature)) { self.config.sendTemperature = self.defaults.sendTemperature; }
 		if (!axis.isBoolean(self.config.sendHumidity)) { self.config.sendHumidity = self.defaults.sendHumidity; }
 		if (!axis.isBoolean(self.config.roundTemperature)) { self.config.roundTemperature = self.defaults.roundTemperature; }
@@ -230,6 +233,7 @@ Module.register("MMM-LocalTemperature", {
 			else { self.log(payload.message, payload.logType); }
 		} else if (notification === "DATA_RECEIVED") {
 			if (payload.isSuccessful) {
+				self.lastUpdateTime = new Date();
 				self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": payload.original.attemptNum }));
 				self.log(("Sensor Data: " + JSON.stringify(payload.data)), "dev");
 				self.sensorData = payload.data;
@@ -257,11 +261,11 @@ Module.register("MMM-LocalTemperature", {
 		
 		if (axis.isNull(self.sensorData)) { return; }
 		
-		if (self.config.sendTemperature && axis.isNumber(self.sensorData[self.tempUnit])) {
+		if (self.config.sendTemperature && axis.isNumber(self.sensorData[self.tempUnit]) && !isNaN(self.sensorData[self.tempUnit])) {
 			self.sendNotification("INDOOR_TEMPERATURE", self.sensorData[self.tempUnit]);
 		}
 		
-		if (self.config.sendHumidity && axis.isNumber(self.sensorData.humidity)) {
+		if (self.config.sendHumidity && axis.isNumber(self.sensorData.humidity) && !isNaN(self.sensorData.humidity)) {
 			self.sendNotification("INDOOR_HUMIDITY", self.sensorData.humidity);
 		}
 		
@@ -396,7 +400,7 @@ Module.register("MMM-LocalTemperature", {
 	 */
 	getScripts: function() {
 		var scripts = [];
-		if (typeof axis !== "function") { scripts.push(this.file("scripts/axis.js")); }
+		if (typeof axis !== "object") { scripts.push(this.file("scripts/axis.js")); }
 		return scripts;
 	},
 	

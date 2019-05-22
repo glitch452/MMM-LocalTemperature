@@ -1,0 +1,17 @@
+{
+	"INVALID_PIN": "Le numéro de broche fourni ({pinValue}) n'est pas valide. ",
+	"SUSPENDED": "Suspendu",
+	"RESUMED": "Reprise",
+	"LOADING": "Chargement &hellip;",
+	"DATA_REQUESTED": "Demande envoyée pour obtenir les données du capteur. ",
+	"DATA_SUCCESS": "Lecture du capteur réussie, données reçues du capteur après une tentative de {numberOfAttempts}. ",
+	"DATA_FAILURE_RETRY": "Erreur de lecture du capteur, réessayant dans {retryTimeInSeconds} secondes. ",
+	"DATA_FAILURE": "Erreur de lecture du capteur, incapable de lire les données du capteur. ",
+	"UPDATE_SCHEDULED": "Mise à jour programmée pour s'exécuter automatiquement toutes les {minutes} minutes. ",
+	"INITIAL_DELAY": "Réglage du délai initial. Démarrage dans {seconds} seconde(s). ",
+	"DECIMAL_SYMBOL": ",",
+	"SHOW_TEMP_CELCIUS": "Température: {temperature_var}&deg;C",
+	"SHOW_TEMP_KELVIN": "Température: {temperature_var} K",
+	"SHOW_TEMP_FAHRENHEIT": "Température: {temperature_var}&deg;F",
+	"SHOW_HUMIDITY": "Humidité: {humidity_var}%"
+}
