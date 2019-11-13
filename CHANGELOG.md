@@ -10,6 +10,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Updated the readme to explain how to use the new icon feature
 
+### Fixed
+- Bug fixed for the animation speed value validation
+
 ## [1.2.0] - 2019-05-22
 
 ### Added
