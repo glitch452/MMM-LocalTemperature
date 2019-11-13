@@ -6,7 +6,7 @@ This module reads and displays temperature and humidity information from a senso
 
 | Status  | Version | Date       | Maintained? | Minimum MagicMirror² Version |
 |:------- |:------- |:---------- |:----------- |:---------------------------- |
-| Working | `1.2.0` | 2019-05-22 | Yes         |`2.2.1`                       |
+| Working | `1.3.0` | 2019-11-13 | Yes         |`2.2.1`                       |
 
 ### Example
 ![Example of MMM-LocalTemperature](images/sample.png?raw=true "Example screenshot")
@@ -14,10 +14,10 @@ This module reads and displays temperature and humidity information from a senso
 ### Notable Features
 1. Get data from a DHT11, DHT22, or AM2302 sensor
 2. Display the temperature and/or humidity from this module and/or,
-3. Send the temperature and/or humidity to the built in 'currentweather' module via module notifications
+3. Send the temperature to the built in 'currentweather' module via module notifications
 
 ### Dependencies
-1. A local 'c' program to read the data from the sensor (included)
+1. A local 'c' program, used to read the data from the sensor (included)
 2. The WiringPi library (Free to install and use)
 
 ## Installation
@@ -63,8 +63,8 @@ var config = {
 | `showTemperature`       | *Optional* - When `true`, the module will display the temperature on screen.<br />**Type:** `boolean`<br />**Default:** `false`
 | `showHumidity`          | *Optional* - When `true`, the module will display the humidity on screen.<br />**Type:** `boolean`<br />**Default:** `false`
 | `iconView`              | *Optional* - When `true`, a view which uses icons and the data will be shown instead of the standard temperature and humidity text. The data shown depends on the `showTemperature` and `showHumidity` options. <br />**Type:** `boolean`<br />**Default:** `true`
-| `temperatureText`       | *Optional* - The text template to be used when displaying the temperature data. The stings `"{temperature}"` and `"{humidity}"` will be replaced with the temperature and humidity values respectively. <br />**Type:** `string`<br />**Default:** `"Temperature: {temperature}°C/°F/K"`
-| `humidityText`          | *Optional* - The text template to be used when displaying the humidity data. The stings `"{temperature}"` and `"{humidity}"` will be replaced with the temperature and humidity values respectively. <br />**Type:** `string`<br />**Default:** `"Humidity: {humidity}%"`
+| `temperatureText`       | *Optional* - The text template to be used when displaying the temperature data. The stings `"{temperature}"` and `"{humidity}"` will be replaced with the temperature and humidity values respectively. For icons, `"{icon-<fa_name>}"` will be replaced with the html tag for the corresponding [FontAwesome](https://fontawesome.com/icons?d=gallery&m=free) icon (this uses the solid style).  Use `"{icon-regular-<fa_name>}"`, `"{icon-solid-<fa_name>}"`, `"{icon-brand-<fa_name>}"` to specify the solid / regular type or when using a brand icon.  Ex: use `"{icon-solid-thermometer-half}"` for the fa-thermometer-half icon.  <br />**Type:** `string`<br />**Default:** `"Temperature: {temperature}°C/°F/K"`
+| `humidityText`          | *Optional* - The text template to be used when displaying the humidity data. The stings `"{temperature}"` and `"{humidity}"` will be replaced with the temperature and humidity values respectively. For icons, `"{icon-<fa_name>}"` will be replaced with the html tag for the corresponding [FontAwesome](https://fontawesome.com/icons?d=gallery&m=free) icon (this uses the solid style).  Use `"{icon-regular-<fa_name>}"`, `"{icon-solid-<fa_name>}"`, `"{icon-brand-<fa_name>}"` to specify the solid / regular type or when using a brand icon.  Ex: use `"{icon-solid-thermometer-half}"` for the fa-thermometer-half icon.  <br />**Type:** `string`<br />**Default:** `"Humidity: {humidity}%"`
 | `fontSize`              | *Optional* - The main font size to use for the module text. <br />**Type:** `string`<br />**Default:** `'medium'`<br />**Options:** `'x-small'`, `'small'`, `'medium'`, `'large'`, `'x-large'`
 | `decimalSymbol`         | *Optional* - The character to use as the decimal symbol. <br />**Type:** `string`<br />**Default:** `"."`
 | `roundTemperature`      | *Optional* - When true, the temperature value will be rounded to the nearest integer. <br />**Type:** `boolean`<br />**Default:** `false`
