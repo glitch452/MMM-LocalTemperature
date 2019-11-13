@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.0] - 2019-11-13
+
+### Added the ability to specify icons in the `temperatureText` and `humidityText` options
+### Updated the readme to explain how to use the new icon feature
+
 ## [1.2.0] - 2019-05-22
 
 ### Added

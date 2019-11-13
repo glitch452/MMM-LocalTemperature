@@ -158,10 +158,10 @@ Module.register("MMM-LocalTemperature", {
 	 * This method stops the update timer.
 	 */
 	suspend: function() {
-        var self = this;
+		var self = this;
 		self.log(self.translate("SUSPENDED") + ".");
 		clearInterval(self.updateTimer);
-    },
+	},
 
 	/**
 	 * Override the resume function that is called when the module instance is un-hidden.
@@ -169,22 +169,22 @@ Module.register("MMM-LocalTemperature", {
 	 * has been passed since the module was suspended.
 	 */
 	resume: function() {
-        var self = this;
+		var self = this;
 		self.log(self.translate("RESUMED") + ".");
 		self.scheduleUpdate();
 		var date = new Date();
 		var threshold = new Date( self.lastUpdateTime.getTime() + self.config.updateInterval );
 		if (date >= threshold) { self.getData(1); }
-    },
+	},
 
 	/**
 	 * The scheduleUpdate function starts the auto update timer.
 	 */
 	scheduleUpdate: function() {
-        var self = this;
-        self.updateTimer = setInterval(function() { self.getData(1); }, self.config.updateInterval);
+		var self = this;
+		self.updateTimer = setInterval(function() { self.getData(1); }, self.config.updateInterval);
 		self.log( self.translate("UPDATE_SCHEDULED", { "minutes": (self.config.updateInterval / (1000 * 60)) }) );
-    },
+	},
 
 	/**
 	 * The getData function sends a request to the node helper read the data from the sensor
@@ -299,7 +299,7 @@ Module.register("MMM-LocalTemperature", {
 	 */
 	getDom: function() {
 		var self = this;
-		var dataContainer;
+		var dataContainer, content;
 		var wrapper = document.createElement("div");
 
 		if (self.config.showTemperature || self.config.showHumidity) {
@@ -338,18 +338,32 @@ Module.register("MMM-LocalTemperature", {
 				if (self.config.showTemperature) {
 					dataContainer = document.createElement("div");
 					dataContainer.classList.add("temperature-container");
-					dataContainer.innerHTML = self.config.temperatureText;
-					dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{temperature}", temperatureValue);
-					dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{humidity}", humidityValue);
+
+					content = self.config.temperatureText;
+					content = content.replace(/{icon-regular-([A-Za-z0-9-_]+)}/g, "<span class=\"far fa-$1\"></span>");
+					content = content.replace(/{icon-solid-([A-Za-z0-9-_]+)}/g, "<span class=\"fas fa-$1\"></span>");
+					content = content.replace(/{icon-brand-([A-Za-z0-9-_]+)}/g, "<span class=\"fab fa-$1\"></span>");
+					content = content.replace(/{icon-([A-Za-z0-9-_]+)}/g, "<span class=\"fa fa-$1\"></span>");
+					content = self.replaceAll(content, "{temperature}", temperatureValue);
+					content = self.replaceAll(content, "{humidity}", humidityValue);
+					dataContainer.innerHTML = content;
+
 					wrapper.appendChild(dataContainer);
 				}
 
 				if (self.config.showHumidity) {
 					dataContainer = document.createElement("div");
 					dataContainer.classList.add("humidity-container");
-					dataContainer.innerHTML = self.config.humidityText;
-					dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{temperature}", temperatureValue);
-					dataContainer.innerHTML = self.replaceAll(dataContainer.innerHTML, "{humidity}", humidityValue);
+
+					content = self.config.humidityText;
+					content = content.replace(/{icon-regular-([A-Za-z0-9-_]+)}/g, "<span class=\"far fa-$1\"></span>");
+					content = content.replace(/{icon-solid-([A-Za-z0-9-_]+)}/g, "<span class=\"fas fa-$1\"></span>");
+					content = content.replace(/{icon-brand-([A-Za-z0-9-_]+)}/g, "<span class=\"fab fa-$1\"></span>");
+					content = content.replace(/{icon-([A-Za-z0-9-_]+)}/g, "<span class=\"fa fa-$1\"></span>");
+					content = self.replaceAll(content, "{temperature}", temperatureValue);
+					content = self.replaceAll(content, "{humidity}", humidityValue);
+					dataContainer.innerHTML = content;
+
 					wrapper.appendChild(dataContainer);
 				}
 			}
@@ -371,9 +385,9 @@ Module.register("MMM-LocalTemperature", {
 	 * @return (number) The rounded number
 	 */
 	roundNumber: function(number, precision) {
-        if (precision >= 0) { return Number(Math.round(number + "e" + precision) + "e-" + precision); }
-    	else { return Number(Math.round(number + "e-" + Math.abs(precision)) + "e" + Math.abs(precision)); }
-    },
+		if (precision >= 0) { return Number(Math.round(number + "e" + precision) + "e-" + precision); }
+		else { return Number(Math.round(number + "e-" + Math.abs(precision)) + "e" + Math.abs(precision)); }
+	},
 
 	/**
 	 * The replaceAll function replaces all occurrences of a string within the given string.
