@@ -18,7 +18,7 @@ This module reads and displays temperature and humidity information from a senso
 
 ### Dependencies
 1. A local 'c' program, used to read the data from the sensor (included)
-2. The WiringPi library (Free to install and use)
+2. The WiringPi library (Free to install and use. If running on Raspberry Pi 4, follow these steps to update wiringpi [http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b/](http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b/))
 
 ## Installation
 To install the module, use your terminal to:
