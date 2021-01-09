@@ -55,7 +55,7 @@ module.exports = NodeHelper.create({
 	 */
 	getSensorData: function(payload) {
 		var self = this;
-		exec("sudo " + payload.scriptPath + " " + payload.sensorPin + " -m j -a 3", {}, function(error, stdout, stderr){
+		exec(payload.scriptPath + " " + payload.sensorPin + " -m j -a 3", {}, function(error, stdout, stderr){
 			var result;
 			if (!error) {
 				result = { original: payload, isSuccessful: true, data: JSON.parse(stdout) };
