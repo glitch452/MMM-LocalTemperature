@@ -1,0 +1,17 @@
+{
+	"INVALID_PIN": "El número de pin proporcionado ({pinValue}) es incorrecto. ",
+	"SUSPENDED": "Suspendido",
+	"RESUMED": "Reanudado",
+	"LOADING": "Cargando &hellip;",
+	"DATA_REQUESTED": "Solicitud enviada para obtener los datos del sensor. ",
+	"DATA_SUCCESS": "Sensor leído correctamente, datos recibidos del sensor después de {numberOfAttempts} intento(s). ",
+	"DATA_FAILURE_RETRY": "Error de lectura del sensor, reintentando en {retryTimeInSeconds} segundos. ",
+	"DATA_FAILURE": "Error de lectura del sensor, no se pueden leer los datos del sensor. ",
+	"UPDATE_SCHEDULED": "Actualización programada para ejecutarse automáticamente cada {minutes} minuto(s). ",
+	"INITIAL_DELAY": "Delay inicial seteado. Empezando en {seconds} segundo(s). ",
+	"DECIMAL_SYMBOL": ".",
+	"SHOW_TEMP_CELCIUS": "Temperatura: {temperature_var}&deg;C",
+	"SHOW_TEMP_KELVIN": "Temperatura: {temperature_var} K",
+	"SHOW_TEMP_FAHRENHEIT": "Temperatura: {temperature_var}&deg;F",
+	"SHOW_HUMIDITY": "Humedad: {humidity_var}%"
+}
