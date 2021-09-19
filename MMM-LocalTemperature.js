@@ -304,7 +304,7 @@ Module.register("MMM-LocalTemperature", {
 
 		if (self.config.showTemperature || self.config.showHumidity) {
 
-			if (!self.loaded) {
+			if (!self.loaded || !self.sensorData) {
 				wrapper.classList.add("loading");
 				wrapper.classList.add("small");
 				wrapper.innerHTML += self.translate("LOADING");
