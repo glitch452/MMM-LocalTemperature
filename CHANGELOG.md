@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.0] - 2021-09-19
+
+### Added
+- An option to decide whether or not to use `sudo` when calling the sensor script
+- Spanish Translation (thanks to [rafagale](https://github.com/rafagale))
+- The ability to set a temperature and humidity offset
+
+### Fixed
+- The DOM may try to load when there is no sensor data
+
 ## [1.3.0] - 2019-11-13
 
 ### Added

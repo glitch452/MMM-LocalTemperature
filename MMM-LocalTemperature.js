@@ -22,10 +22,13 @@ Module.register("MMM-LocalTemperature", {
 		sensorPin: null,
 		pinScheme: "BCMv2",
 		units: config.units,
+		useSudo: false,
 		sendTemperature: true,
 		sendHumidity: true,
 		showTemperature: false,
 		showHumidity: false,
+		temperatureOffset: 0,
+		humidityOffset: 0,
 		iconView: true,
 		temperatureText: null, // Set in self.start() becuase access to self.translate is needed
 		humidityText: null, // Set in self.start() becuase access to self.translate is needed
@@ -119,6 +122,7 @@ Module.register("MMM-LocalTemperature", {
 		if (!axis.isString(self.config.humidityText) || self.config.humidityText.length < 1 ) { self.config.humidityText = self.defaults.humidityText; }
 		if (!self.validPinSchemes.includes(self.config.pinScheme)) { self.config.pinScheme = self.defaults.pinScheme; }
 		if (!axis.isNumber(self.config.sensorPin) || isNaN(self.config.sensorPin)) { self.config.sensorPin = self.defaults.sensorPin; }
+		if (!axis.isBoolean(self.config.useSudo)) { self.config.useSudo = self.defaults.useSudo; }
 		if (!axis.isBoolean(self.config.sendTemperature)) { self.config.sendTemperature = self.defaults.sendTemperature; }
 		if (!axis.isBoolean(self.config.sendHumidity)) { self.config.sendHumidity = self.defaults.sendHumidity; }
 		if (!axis.isBoolean(self.config.roundTemperature)) { self.config.roundTemperature = self.defaults.roundTemperature; }
@@ -126,6 +130,10 @@ Module.register("MMM-LocalTemperature", {
 		if (!axis.isBoolean(self.config.iconView)) { self.config.iconView = self.defaults.iconView; }
 		if (!axis.isString(self.config.decimalSymbol)) { self.config.decimalSymbol = self.defaults.decimalSymbol; }
 		if (!self.validFontSizes.includes(self.config.fontSize)) { self.config.fontSize = self.defaults.fontSize; }
+		if (axis.isNumber(self.config.temperatureOffset) && !isNaN(self.config.temperatureOffset)) { self.config.temperatureOffset = self.config.temperatureOffset; }
+		else { self.config.temperatureOffset = self.defaults.temperatureOffset; }
+		if (axis.isNumber(self.config.humidityOffset) && !isNaN(self.config.humidityOffset)) { self.config.humidityOffset = self.config.humidityOffset; }
+		else { self.config.humidityOffset = self.defaults.humidityOffset; }
 
 		// Validate the provided sensorPin
 		var pinObj = pinMapping.find(function(val) { return val[this.scheme] === this.pin; }, { scheme: self.config.pinScheme, pin: self.config.sensorPin });
@@ -198,7 +206,8 @@ Module.register("MMM-LocalTemperature", {
 			instanceID: self.instanceID,
 			scriptPath: self.config.scriptPath,
 			sensorPin: self.config.sensorPin,
-			attemptNum: attemptNum,
+			attemptNum,
+			useSudo: self.config.useSudo,
 			notification: "DATA_RECEIVED"
 		});
 	},
@@ -237,6 +246,8 @@ Module.register("MMM-LocalTemperature", {
 				self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": payload.original.attemptNum }));
 				self.log(("Sensor Data: " + JSON.stringify(payload.data)), "dev");
 				self.sensorData = payload.data;
+				self.sensorData[self.tempUnit] += self.config.temperatureOffset;
+				self.sensorData.humidity += self.config.humidityOffset;
 				self.sendDataNotifications();
 				self.loaded = true;
 				if (self.data.position) { self.updateDom(self.config.animationSpeed); }
@@ -304,7 +315,7 @@ Module.register("MMM-LocalTemperature", {
 
 		if (self.config.showTemperature || self.config.showHumidity) {
 
-			if (!self.loaded) {
+			if (!self.loaded || !self.sensorData) {
 				wrapper.classList.add("loading");
 				wrapper.classList.add("small");
 				wrapper.innerHTML += self.translate("LOADING");
