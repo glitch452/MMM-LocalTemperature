@@ -27,6 +27,8 @@ Module.register("MMM-LocalTemperature", {
 		sendHumidity: true,
 		showTemperature: false,
 		showHumidity: false,
+		temperatureOffset: 0,
+		humidityOffset: 0,
 		iconView: true,
 		temperatureText: null, // Set in self.start() becuase access to self.translate is needed
 		humidityText: null, // Set in self.start() becuase access to self.translate is needed
@@ -128,6 +130,10 @@ Module.register("MMM-LocalTemperature", {
 		if (!axis.isBoolean(self.config.iconView)) { self.config.iconView = self.defaults.iconView; }
 		if (!axis.isString(self.config.decimalSymbol)) { self.config.decimalSymbol = self.defaults.decimalSymbol; }
 		if (!self.validFontSizes.includes(self.config.fontSize)) { self.config.fontSize = self.defaults.fontSize; }
+		if (axis.isNumber(self.config.temperatureOffset) && !isNaN(self.config.temperatureOffset)) { self.config.temperatureOffset = self.config.temperatureOffset; }
+		else { self.config.temperatureOffset = self.defaults.temperatureOffset; }
+		if (axis.isNumber(self.config.humidityOffset) && !isNaN(self.config.humidityOffset)) { self.config.humidityOffset = self.config.humidityOffset; }
+		else { self.config.humidityOffset = self.defaults.humidityOffset; }
 
 		// Validate the provided sensorPin
 		var pinObj = pinMapping.find(function(val) { return val[this.scheme] === this.pin; }, { scheme: self.config.pinScheme, pin: self.config.sensorPin });
@@ -240,6 +246,8 @@ Module.register("MMM-LocalTemperature", {
 				self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": payload.original.attemptNum }));
 				self.log(("Sensor Data: " + JSON.stringify(payload.data)), "dev");
 				self.sensorData = payload.data;
+				self.sensorData[self.tempUnit] += self.config.temperatureOffset;
+				self.sensorData.humidity += self.config.humidityOffset;
 				self.sendDataNotifications();
 				self.loaded = true;
 				if (self.data.position) { self.updateDom(self.config.animationSpeed); }
