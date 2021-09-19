@@ -6,7 +6,7 @@ This module reads and displays temperature and humidity information from a senso
 
 | Status  | Version | Date       | Maintained? | Minimum MagicMirror² Version |
 |:------- |:------- |:---------- |:----------- |:---------------------------- |
-| Working | `1.3.0` | 2019-11-13 | Yes         |`2.2.1`                       |
+| Working | `1.4.0` | 2021-09-19 | Yes         |`2.2.1`                       |
 
 ### Example
 ![Example of MMM-LocalTemperature](images/sample.png?raw=true "Example screenshot")
@@ -14,7 +14,7 @@ This module reads and displays temperature and humidity information from a senso
 ### Notable Features
 1. Get data from a DHT11, DHT22, or AM2302 sensor
 2. Display the temperature and/or humidity from this module and/or,
-3. Send the temperature to the built in 'currentweather' module via module notifications
+3. Send the temperature to the built in 'weather' module via module notifications
 
 ### Dependencies
 1. A local 'c' program, used to read the data from the sensor (included)
@@ -24,7 +24,9 @@ This module reads and displays temperature and humidity information from a senso
 To install the module, use your terminal to:
 1. Navigate to your MagicMirror's modules folder. If you are using the default installation directory, use the command:<br />`cd ~/MagicMirror/modules`
 2. Copy the module to your computer by executing the following command:<br />`git clone https://github.com/glitch452/MMM-LocalTemperature.git`
-3. Install the WiringPi library by executing the following command:<br />`sudo apt-get update && sudo apt-get upgrade && sudo apt-get install build-essential wiringpi`
+3. Install the WiringPi library by executing the following command:<br />`sudo apt-get -y update && sudo apt-get -y upgrade && sudo apt-get -y install build-essential wiringpi`
+    **Note:** If running on Raspberry Pi 4, use the following process to update wiringpi  
+    [http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b](http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b)
 4. Make sure the `DHT` program that reads the sensor data is executable by executing the following command:<br />`cd MMM-LocalTemperature && chmod +x DHT`
 
 ## Using the module
@@ -57,6 +59,7 @@ var config = {
 |:----------------------- |:-------------
 | `sensorPin`             | **REQUIRED** - The GPIO Pin number that is connected to the data pin on the sensor. The default pin scheme is the standard Raspberry Pi (BCM) GPIO numbering system for Rev 2 Pi's. See the `pinScheme` option for other numbering systems.<br />**Type:** `number`
 | `pinScheme`             | *Optional* - The pin numbering system to use for the `sensorPin` option. See this [interactive pinout diagram](https://pinout.xyz) for more details on pin usage for the Raspberry Pi. <br />Note: Ultimately the `sensorPin` value will be converted to the WiringPi system, becuase that is the library used by the `DHT` program to interact with the pin. However, any of these numbering systems can be used, since this module will convert the `sensorPin` value automatically based on the selected scheme. <br />**Type:** `string`<br />**Default:** `"BCMv2"`<br />**Options:**<br />- `"BCMv2"` The standard Raspberry Pi GPIO numbering system on current (Rev 2) boards<br />- `"BCMv1"` The standard Raspberry Pi GPIO numbering system on older (Rev 1) boards<br />- `"BOARD"` The physical pin numbering on the GPIO header<br />- `"WPI"` The WiringPi numbering system
+| `useSudo`               | *Optional* - Whether or not to use sudo when calling the script to get the sensor data. A value of `true` uses sudo, `false` does not use sudo.  (Added in v1.4.0)<br />**Type:** `boolean`<br />**Default:** `false`
 | `units`                 | *Optional* - The unit system to use for the temperature value. (`"metric"` = Celcius, `"imperial"` = Fahrenheit, `"default"` = Kelvin)<br />**Type:** `string`<br />**Default:** `config.units`<br />**Options:** `"metric"`, `"imperial"`, `"default"`
 | `sendTemperature`       | *Optional* - When `true`, an "INDOOR_TEMPERATURE" notification is sent to the other modules when the data is received from the sensor.  This can be used to display the indoor temperature within the built-in 'currentweather' module. The 'currentweather' module's `showIndoorTemperature` option must be set to `true` for it to display the data sent from this module.<br />**Type:** `boolean`<br />**Default:** `true`
 | `sendHumidity`          | *Optional* - When `true`, an "INDOOR_HUMIDITY" notification is sent to the other modules when the data is received from the sensor.  This can be used to display the indoor humidity within the built-in 'currentweather' module. The 'currentweather' module's `showIndoorHumidity` option must be set to `true` for it to display the data sent from this module.<br />**Type:** `boolean`<br />**Default:** `true`
