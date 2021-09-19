@@ -22,6 +22,7 @@ Module.register("MMM-LocalTemperature", {
 		sensorPin: null,
 		pinScheme: "BCMv2",
 		units: config.units,
+		useSudo: false,
 		sendTemperature: true,
 		sendHumidity: true,
 		showTemperature: false,
@@ -119,6 +120,7 @@ Module.register("MMM-LocalTemperature", {
 		if (!axis.isString(self.config.humidityText) || self.config.humidityText.length < 1 ) { self.config.humidityText = self.defaults.humidityText; }
 		if (!self.validPinSchemes.includes(self.config.pinScheme)) { self.config.pinScheme = self.defaults.pinScheme; }
 		if (!axis.isNumber(self.config.sensorPin) || isNaN(self.config.sensorPin)) { self.config.sensorPin = self.defaults.sensorPin; }
+		if (!axis.isBoolean(self.config.useSudo)) { self.config.useSudo = self.defaults.useSudo; }
 		if (!axis.isBoolean(self.config.sendTemperature)) { self.config.sendTemperature = self.defaults.sendTemperature; }
 		if (!axis.isBoolean(self.config.sendHumidity)) { self.config.sendHumidity = self.defaults.sendHumidity; }
 		if (!axis.isBoolean(self.config.roundTemperature)) { self.config.roundTemperature = self.defaults.roundTemperature; }
@@ -198,7 +200,8 @@ Module.register("MMM-LocalTemperature", {
 			instanceID: self.instanceID,
 			scriptPath: self.config.scriptPath,
 			sensorPin: self.config.sensorPin,
-			attemptNum: attemptNum,
+			attemptNum,
+			useSudo: self.config.useSudo,
 			notification: "DATA_RECEIVED"
 		});
 	},
